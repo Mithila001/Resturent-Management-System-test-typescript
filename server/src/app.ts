@@ -1,0 +1,65 @@
+const express = require("express");
+const cors = require("cors");
+const morgan = require("morgan");
+const path = require("path");
+
+const app = express();
+
+// CORS MUST be first - allow all origins
+app.use(
+  cors({
+    origin: "*",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
+
+// Middleware
+app.use(express.json());
+
+// Serve static files for images
+app.use("/images", express.static(path.join(__dirname, "../public/images")));
+
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+}
+
+// Routes
+const authRoutes = require("./routes/authRoutes");
+const categoryRoutes = require("./routes/categoryRoutes");
+const menuRoutes = require("./routes/menuRoutes");
+const orderRoutes = require("./routes/orderRoutes");
+const tableRoutes = require("./routes/tableRoutes");
+const inventoryRoutes = require("./routes/inventoryRoutes");
+
+app.use("/api/auth", authRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/menu", menuRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/tables", tableRoutes);
+app.use("/api/inventory", inventoryRoutes);
+
+app.get("/", (req: any, res: any) => {
+  res.send("Restaurant Ordering System API is running...");
+});
+
+// Error Handling Middleware
+// 404 Handler - MUST be before error handler
+app.use((req: any, res: any, next: any) => {
+  const error = new Error(`Not Found - ${req.originalUrl}`);
+  res.status(404);
+  next(error);
+});
+
+// Error Handling Middleware
+app.use((err: any, req: any, res: any, next: any) => {
+  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  res.status(statusCode);
+  res.json({
+    message: err.message,
+    stack: process.env.NODE_ENV === "production" ? null : err.stack,
+  });
+});
+
+module.exports = app;

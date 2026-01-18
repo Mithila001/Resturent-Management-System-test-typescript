@@ -1,0 +1,99 @@
+/* Additional status badge styles appended to index.css */
+
+/* Order Status Badges */
+.status-pending {
+    background: linear-gradient(135deg, #FFF4E6 0%, #FFE0B2 100%);
+    color: #E65100;
+    border: 1px solid #FFB74D;
+}
+
+.status-confirmed {
+    background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+    color: #0D47A1;
+    border: 1px solid #64B5F6;
+}
+
+.status-preparing {
+    background: linear-gradient(135deg, #FFF9C4 0%, #FFF59D 100%);
+    color: #F57F17;
+    border: 1px solid #FDD835;
+}
+
+.status-ready {
+    background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+    color: #1B5E20;
+    border: 1px solid #66BB6A;
+}
+
+.status-delivered {
+    background: linear-gradient(135deg, #E0F2F1 0%, #B2DFDB 100%);
+    color: #004D40;
+    border: 1px solid #4DB6AC;
+}
+
+.status-cancelled {
+    background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%);
+    color: #B71C1C;
+    border: 1px solid #E57373;
+}
+
+.status-out-for-delivery {
+    background: linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%);
+    color: #4A148C;
+    border: 1px solid #AB47BC;
+}
+
+/* Role Badges */
+.role-admin {
+    background: linear-gradient(135deg, #FF6B35 0%, #E85A28 100%);
+    color: white;
+    border: 1px solid #D64A1B;
+}
+
+.role-owner {
+    background: linear-gradient(135deg, #8E24AA 0%, #6A1B9A 100%);
+    color: white;
+    border: 1px solid #4A148C;
+}
+
+.role-manager {
+    background: linear-gradient(135deg, #1976D2 0%, #1565C0 100%);
+    color: white;
+    border: 1px solid #0D47A1;
+}
+
+.role-chef {
+    background: linear-gradient(135deg, #F57C00 0%, #EF6C00 100%);
+    color: white;
+    border: 1px solid #E65100;
+}
+
+.role-waiter,
+.role-cashier {
+    background: linear-gradient(135deg, #00897B 0%, #00796B 100%);
+    color: white;
+    border: 1px solid #00695C;
+}
+
+.role-customer {
+    background: linear-gradient(135deg, #757575 0%, #616161 100%);
+    color: white;
+    border: 1px solid #424242;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.375rem 0.875rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    border-radius: var(--radius-full);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+}
+
+/* Dark theme adjustments for badges */
+.dark-theme .status-badge,
+.dark-theme .badge {
+    filter: brightness(0.9);
+}

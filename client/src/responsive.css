@@ -1,0 +1,641 @@
+/* ========================================
+   RESPONSIVE BREAKPOINTS
+   ======================================== */
+:root {
+  --mobile-max: 767px;
+  --tablet-max: 1024px;
+  --desktop-min: 1025px;
+}
+
+/* ========================================
+   MOBILE FIRST RESPONSIVE DESIGN
+   ======================================== */
+
+/* Base styles (mobile) */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding: 0 2rem;
+  }
+}
+
+@media (min-width: 1025px) {
+  .container {
+    padding: 0 3rem;
+  }
+}
+
+/* ========================================
+   NAVIGATION / HEADER
+   ======================================== */
+nav {
+  padding: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+@media (max-width: 767px) {
+  nav {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  nav a,
+  nav button {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  nav {
+    padding: 1.5rem;
+  }
+}
+
+/* ========================================
+   FORMS
+   ======================================== */
+form {
+  max-width: 100%;
+}
+
+@media (max-width: 767px) {
+  .auth-form,
+  .checkout-form {
+    padding: 1rem;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  textarea,
+  select {
+    width: 100%;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+@media (min-width: 768px) {
+  .auth-form,
+  .checkout-form {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+}
+
+/* ========================================
+   BUTTONS
+   ======================================== */
+@media (max-width: 767px) {
+  .btn {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  .button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .button-group .btn {
+    width: 100% !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .button-group {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+}
+
+/* ========================================
+   CARDS & GRID LAYOUTS
+   ======================================== */
+.grid {
+  display: grid;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+/* Mobile: 1 column */
+@media (max-width: 767px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+}
+
+/* Tablet: 2 columns */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+
+/* Desktop: 3+ columns */
+@media (min-width: 1025px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  }
+}
+
+/* ========================================
+   MENU ITEMS
+   ======================================== */
+@media (max-width: 767px) {
+  .menu-item {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .menu-item img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+  }
+
+  .menu-item-content {
+    padding: 1rem;
+  }
+
+  .menu-item-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .menu-item {
+    display: grid;
+    grid-template-columns: 150px 1fr auto;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .menu-item img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+  }
+}
+
+/* ========================================
+   TABLES
+   ======================================== */
+@media (max-width: 767px) {
+  /* Stack table on mobile */
+  table,
+  thead,
+  tbody,
+  th,
+  td,
+  tr {
+    display: block;
+  }
+
+  thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  tr {
+    border: 1px solid #ddd;
+    margin-bottom: 1rem;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  td {
+    border: none;
+    position: relative;
+    padding: 0.75rem 0.75rem 0.75rem 50%;
+    text-align: right;
+  }
+
+  td:before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0.75rem;
+    width: 45%;
+    padding-right: 10px;
+    white-space: nowrap;
+    text-align: left;
+    font-weight: bold;
+  }
+}
+
+@media (min-width: 768px) {
+  table {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  td,
+  th {
+    padding: 1rem;
+  }
+}
+
+/* ========================================
+   CART
+   ======================================== */
+@media (max-width: 767px) {
+  .cart-drawer {
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    right: 0;
+    border-radius: 0;
+  }
+
+  .cart-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .cart-item img {
+    width: 100%;
+    max-width: 200px;
+    margin: 0 auto;
+  }
+
+  .cart-footer {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 1.5rem 1rem;
+    box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@media (min-width: 768px) {
+  .cart-drawer {
+    width: 400px;
+    height: 100vh;
+    top: 0;
+    right: 0;
+  }
+
+  .cart-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .cart-item img {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+/* ========================================
+   DASHBOARD / ADMIN PANEL
+   ======================================== */
+@media (max-width: 767px) {
+  .dashboard-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .dashboard-tab {
+    width: 100%;
+    text-align: center;
+  }
+
+  .dashboard-content {
+    padding: 1rem;
+  }
+
+  .dashboard-stats {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .dashboard-tabs {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    border-bottom: 2px solid #e5e5e5;
+    flex-wrap: wrap;
+  }
+
+  .dashboard-content {
+    padding: 2rem;
+  }
+
+  .dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+/* ========================================
+   MODALS
+   ======================================== */
+@media (max-width: 767px) {
+  .modal {
+    width: 100vw;
+    height: 100vh;
+    max-height: none;
+    margin: 0;
+    border-radius: 0;
+    overflow-y: auto;
+  }
+
+  .modal-content {
+    padding: 1rem;
+  }
+
+  .modal-header {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 10;
+    padding: 1rem;
+    border-bottom: 1px solid #e5e5e5;
+  }
+}
+
+@media (min-width: 768px) {
+  .modal {
+    max-width: 600px;
+    max-height: 90vh;
+    margin: 2rem auto;
+    border-radius: var(--radius-lg);
+    overflow-y: auto;
+  }
+
+  .modal-content {
+    padding: 2rem;
+  }
+}
+
+/* ========================================
+   ORDER TRACKING
+   ======================================== */
+@media (max-width: 767px) {
+  .order-timeline {
+    padding: 1rem;
+  }
+
+  .order-step {
+    padding: 1rem 0;
+    border-left: 3px solid #e5e5e5;
+    padding-left: 2rem;
+    position: relative;
+  }
+
+  .order-step-icon {
+    position: absolute;
+    left: -15px;
+    width: 30px;
+    height: 30px;
+  }
+
+  .order-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .order-items {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 768px) {
+  .order-timeline {
+    display: flex;
+    justify-content: space-between;
+    padding: 2rem;
+  }
+
+  .order-step {
+    text-align: center;
+    flex: 1;
+  }
+
+  .order-details {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+  }
+}
+
+/* ========================================
+   IMAGES
+   ======================================== */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 767px) {
+  .hero-image {
+    height: 200px;
+    object-fit: cover;
+  }
+}
+
+@media (min-width: 768px) {
+  .hero-image {
+    height: 400px;
+    object-fit: cover;
+  }
+}
+
+/* ========================================
+   TYPOGRAPHY
+   ======================================== */
+@media (max-width: 767px) {
+  h1 {
+    font-size: 1.75rem;
+    line-height: 1.2;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    line-height: 1.3;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    line-height: 1.4;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  body {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 768px) {
+  h1 {
+    font-size: 2.5rem;
+  }
+
+  h2 {
+    font-size: 2rem;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+  }
+
+  body {
+    font-size: 16px;
+  }
+}
+
+/* ========================================
+   SPACING
+   ======================================== */
+@media (max-width: 767px) {
+  .section {
+    padding: 2rem 0;
+  }
+
+  .page-content {
+    padding: 1rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .section {
+    padding: 4rem 0;
+  }
+
+  .page-content {
+    padding: 2rem;
+  }
+}
+
+/* ========================================
+   TOUCH TARGETS (Mobile Optimization)
+   ======================================== */
+@media (max-width: 767px) and (pointer: coarse) {
+  /* Ensure touch targets are at least 44x44px */
+  button,
+  a,
+  input[type="checkbox"],
+  input[type="radio"],
+  select {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Larger tap targets for interactive elements */
+  .clickable {
+    padding: 0.75rem;
+  }
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+@media print {
+  nav,
+  .btn,
+  .cart,
+  .modal,
+  .notification {
+    display: none !important;
+  }
+
+  .page-content {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    color: black;
+    background: white;
+  }
+}
+
+/* ========================================
+   ACCESSIBILITY
+   ======================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus visible for keyboard navigation */
+:focus-visible {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --shadow-sm: 0 0 0 1px black;
+    --shadow-md: 0 0 0 2px black;
+    --shadow-lg: 0 0 0 3px black;
+  }
+
+  .card {
+    border: 2px solid black;
+  }
+}
+
+/* ========================================
+   LANDSCAPE ORIENTATION (MOBILE)
+   ======================================== */
+@media (max-width: 767px) and (orientation: landscape) {
+  .modal,
+  .cart-drawer {
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+
+  nav {
+    padding: 0.5rem;
+  }
+}
