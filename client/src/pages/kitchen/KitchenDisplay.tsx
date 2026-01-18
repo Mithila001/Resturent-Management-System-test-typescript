@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { useSocket } from "../../context/SocketContext";
-import API_URL from "../../config/api";
+import { chefAPI } from "../../api/chefAPI";
 import type { Socket } from "socket.io-client";
 
 // Medium-level typed Order / OrderItem used by the kitchen display
@@ -39,15 +38,9 @@ const KitchenDisplay: React.FC = () => {
 
   const fetchOrders = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get<{ orders: Order[] }>(`${API_URL}/orders?limit=100`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      // Filter strictly for kitchen relevant statuses
-      const kitchenOrders = (res.data?.orders || []).filter((order) =>
-        ["pending", "confirmed", "preparing"].includes(order.orderStatus),
-      );
+      // Use new chef API for Kitchen Display System
+      const res = await chefAPI.getKitchenOrders();
+      const kitchenOrders = Array.isArray(res.data) ? res.data : [];
 
       setOrders(kitchenOrders);
       setLoading(false);
@@ -83,12 +76,21 @@ const KitchenDisplay: React.FC = () => {
 
   const updateStatus = async (id: string, status: Order["orderStatus"]) => {
     try {
-      const token = localStorage.getItem("token");
-      await axios.put(
-        `${API_URL}/orders/${id}/status`,
-        { orderStatus: status },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      // Use appropriate chef API based on status
+      switch (status) {
+        case "confirmed":
+          await chefAPI.confirmOrder(id);
+          break;
+        case "preparing":
+          await chefAPI.startPreparingOrder(id);
+          break;
+        case "ready":
+          await chefAPI.markOrderAsReady(id);
+          break;
+        default:
+          console.warn("Unsupported status update:", status);
+          return;
+      }
       // The socket listener will trigger a refresh
     } catch (err) {
       alert("Failed to update status");

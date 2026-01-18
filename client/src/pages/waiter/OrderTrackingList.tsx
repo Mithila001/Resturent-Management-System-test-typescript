@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
-import axios from "axios";
 import { Link } from "react-router-dom";
-import API_URL from "../../config/api";
+import { waiterAPI } from "../../api/waiterAPI";
 import type { Order } from "../../interfaces/types";
 
 type Filter = "all" | "pending" | "preparing" | "ready";
@@ -14,18 +13,14 @@ const OrderTrackingList: React.FC = () => {
   const fetchOrders = useCallback(async (): Promise<void> => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
-      const res = await axios.get<{ orders?: Order[] }>(`${API_URL}/orders`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      // API returns { orders: [], currentPage, totalPages } - extract the orders array
-      const ordersData = res.data?.orders ?? (Array.isArray(res.data) ? (res.data as Order[]) : []);
+      // Use new waiter API to get orders for assigned tables
+      const res = await waiterAPI.getMyTableOrders();
+      const ordersData = Array.isArray(res.data) ? res.data : [];
 
       // Filter for active orders only
-      const activeOrders = Array.isArray(ordersData)
-        ? ordersData.filter((o) => o.orderStatus !== "delivered" && o.orderStatus !== "cancelled")
-        : [];
+      const activeOrders = ordersData.filter(
+        (o: Order) => o.orderStatus !== "delivered" && o.orderStatus !== "cancelled",
+      );
 
       setOrders(activeOrders);
     } catch (err) {
@@ -45,16 +40,11 @@ const OrderTrackingList: React.FC = () => {
   const markDelivered = useCallback(
     async (id: string): Promise<void> => {
       try {
-        const token = localStorage.getItem("token");
-        await axios.put(
-          `${API_URL}/orders/${id}/status`,
-          { status: "delivered" },
-          { headers: { Authorization: `Bearer ${token}` } },
-        );
+        await waiterAPI.markOrderAsDelivered(id);
         await fetchOrders();
       } catch (err) {
         console.error(err);
-        alert("Failed to update order");
+        alert("Failed to mark order as delivered");
       }
     },
     [fetchOrders],

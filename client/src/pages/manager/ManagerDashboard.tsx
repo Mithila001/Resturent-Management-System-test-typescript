@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import { managerAPI } from "../../api/managerAPI";
 import { Link } from "react-router-dom";
-import API_URL from "../../config/api";
 
 const ManagerDashboard = () => {
   const [stats, setStats] = useState({
@@ -16,14 +15,11 @@ const ManagerDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const res = await axios.get(`${API_URL}/orders/stats`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setStats(res.data);
+        const response = await managerAPI.getDashboardStats("today");
+        setStats(response.data);
         setLoading(false);
       } catch (err) {
-        console.error(err);
+        console.error("Failed to fetch stats:", err);
         setLoading(false);
       }
     };

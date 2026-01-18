@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { useCart } from "../../context/CartContext";
-import API_URL from "../../config/api";
+import { customerAPI } from "../../api/customerAPI";
 import type { MenuItem, Category, CartItem } from "../../interfaces/types";
 
 const POS: React.FC = () => {
@@ -24,9 +23,10 @@ const POS: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Use customer API for public menu browsing
         const [catRes, menuRes] = await Promise.all([
-          axios.get<Category[]>(`${API_URL}/categories`),
-          axios.get<MenuItem[]>(`${API_URL}/menu?isAvailable=true`),
+          customerAPI.getCategories(),
+          customerAPI.browseMenu({ isAvailable: true }),
         ]);
         setCategories(catRes.data || []);
         setMenuItems(menuRes.data || []);
@@ -52,14 +52,13 @@ const POS: React.FC = () => {
     if (orderType === "dine-in" && !tableNumber) return alert("Please enter table number");
 
     try {
-      const token = localStorage.getItem("token");
       const orderData = {
         items: cartItems.map((item) => ({
           menuItem: item._id,
           quantity: item.quantity,
         })),
         orderType,
-        paymentMethod: "cash", // Default for POS
+        paymentMethod: "cash" as const, // Default for POS
         tableNumber: orderType === "dine-in" ? parseInt(tableNumber) : undefined,
         deliveryAddress:
           orderType === "delivery"
@@ -73,9 +72,8 @@ const POS: React.FC = () => {
         orderNotes: "Placed via POS",
       };
 
-      await axios.post(`${API_URL}/orders`, orderData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      // Use customer API for order creation
+      await customerAPI.createOrder(orderData);
 
       alert("Order Placed Successfully");
       clearCart();
