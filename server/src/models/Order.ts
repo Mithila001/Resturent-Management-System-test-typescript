@@ -17,7 +17,7 @@ interface IDeliveryAddress {
 }
 
 export interface IOrder extends Document {
-  user: mongoose.Types.ObjectId;
+  user: mongoose.Types.ObjectId | null;
   orderNumber: string;
   items: IOrderItem[];
   totalAmount: number;
@@ -26,8 +26,10 @@ export interface IOrder extends Document {
     | "confirmed"
     | "preparing"
     | "ready"
+    | "served"
     | "out-for-delivery"
     | "delivered"
+    | "dine-in-completed"
     | "cancelled";
   paymentStatus: "pending" | "paid" | "failed" | "refunded";
   paymentMethod: "cash" | "card" | "online";
@@ -40,6 +42,7 @@ export interface IOrder extends Document {
   deliveredAt?: Date;
   cancelledAt?: Date;
   cancellationReason?: string;
+  isCompleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -79,7 +82,8 @@ const orderSchema = new Schema<IOrder>(
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: false, // Optional for guest dine-in orders
+      default: null,
     },
     orderNumber: {
       type: String,
@@ -98,8 +102,10 @@ const orderSchema = new Schema<IOrder>(
         "confirmed",
         "preparing",
         "ready",
+        "served",
         "out-for-delivery",
         "delivered",
+        "dine-in-completed",
         "cancelled",
       ],
       default: "pending",
@@ -179,18 +185,27 @@ const orderSchema = new Schema<IOrder>(
     cancellationReason: {
       type: String,
     },
+    isCompleted: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
   },
   {
     timestamps: true,
   },
 );
 
-// Generate order number before saving
+// Generate order number and set isCompleted before saving
 orderSchema.pre<IOrder>("save", async function (this: IOrder) {
   if (!this.orderNumber) {
     const count = await mongoose.model<IOrder>("Order").countDocuments();
     this.orderNumber = `ORD${Date.now()}${String(count + 1).padStart(4, "0")}`;
   }
+
+  // Auto-update isCompleted based on order status
+  const completedStatuses = ["delivered", "cancelled", "dine-in-completed"];
+  this.isCompleted = completedStatuses.includes(this.orderStatus);
 });
 
 // Index for faster queries

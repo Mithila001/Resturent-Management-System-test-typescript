@@ -35,11 +35,8 @@ const Cart: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleCheckout = () => {
-    if (!user) {
-      alert("Please login to place an order");
-      navigate("/login");
-      return;
-    }
+    // Allow guests to proceed to checkout for dine-in orders
+    // Login requirement will be enforced on checkout page for delivery orders
     navigate("/checkout");
     setIsOpen(false);
   };

@@ -61,4 +61,21 @@ export const customerAPI = {
     api.post(`/customer/menu/${menuItemId}/review`, review),
 };
 
+// Guest order API (no authentication required)
+export const guestOrderAPI = {
+  // Create a guest order (dine-in only, no authentication)
+  createGuestOrder: (
+    orderData: Omit<CreateOrderData, "deliveryAddress"> & { tableNumber: number },
+  ) =>
+    axios.post(`${API_URL}/customer/orders/guest`, orderData, {
+      headers: { "Content-Type": "application/json" },
+    }),
+
+  // Get guest order details by ID (no authentication)
+  getGuestOrderDetails: (orderId: string) =>
+    axios.get(`${API_URL}/customer/orders/guest/${orderId}`, {
+      headers: { "Content-Type": "application/json" },
+    }),
+};
+
 export default customerAPI;

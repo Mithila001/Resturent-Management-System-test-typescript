@@ -127,7 +127,7 @@ const getOrders = async (req: AuthRequest, res: Response) => {
     } else if (req.user?.role === "waiter") {
       // Waiter sees all dine-in orders that are active
       query.orderType = "dine-in";
-      query.orderStatus = { $nin: ["delivered", "cancelled"] };
+      query.isCompleted = false;
     } else if (req.user?.role === "cashier") {
       // Cashier sees orders ready for payment
       query.orderStatus = { $in: ["ready", "delivered"] };
@@ -313,8 +313,19 @@ const cancelOrder = async (req: AuthRequest, res: Response) => {
     }
 
     // Check if user is authorized to cancel this order
-    if (req.user?.role !== "admin" && order.user.toString() !== req.user?._id.toString()) {
+    if (
+      req.user?.role !== "admin" &&
+      order.user &&
+      order.user.toString() !== req.user?._id.toString()
+    ) {
       return res.status(403).json({ message: "Not authorized to cancel this order" });
+    }
+
+    // Prevent customers from cancelling dine-in orders (staff/admin can still cancel)
+    if (order.orderType === "dine-in" && req.user?.role === "customer") {
+      return res.status(403).json({
+        message: "Dine-in orders cannot be cancelled by customers. Please speak to your waiter.",
+      });
     }
 
     // Only allow cancellation if order is not already delivered or cancelled
@@ -384,8 +395,8 @@ const getOrdersByTable = async (req: Request, res: Response) => {
     if (status) {
       query.orderStatus = status;
     } else {
-      // Default: only show active orders (not delivered or cancelled)
-      query.orderStatus = { $nin: ["delivered", "cancelled"] };
+      // Default: only show active orders (not completed)
+      query.isCompleted = false;
     }
 
     const orders = await Order.find(query)

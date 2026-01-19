@@ -95,11 +95,45 @@ const createOrder = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ message: "No order items provided" });
     }
 
+    // Check if user already has an active order
+    const activeUserOrder = await Order.findOne({
+      user: req.user?._id,
+      isCompleted: false,
+    });
+
+    if (activeUserOrder) {
+      return res.status(400).json({
+        message:
+          "You already have an active order. Please wait until it is completed before placing a new one.",
+        existingOrder: {
+          orderNumber: activeUserOrder.orderNumber,
+          orderStatus: activeUserOrder.orderStatus,
+        },
+      });
+    }
+
     // Validate based on order type
     if (orderType === "dine-in") {
       if (!tableNumber) {
         return res.status(400).json({
           message: "Table number is required for dine-in orders",
+        });
+      }
+
+      // Check if table already has an active order
+      const activeTableOrder = await Order.findOne({
+        orderType: "dine-in",
+        tableNumber,
+        isCompleted: false,
+      });
+
+      if (activeTableOrder) {
+        return res.status(400).json({
+          message: `Table ${tableNumber} is currently occupied with an active order. Please choose another table.`,
+          existingOrder: {
+            orderNumber: activeTableOrder.orderNumber,
+            orderStatus: activeTableOrder.orderStatus,
+          },
         });
       }
     } else if (orderType === "delivery") {
@@ -253,6 +287,13 @@ const cancelOrder = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    // Prevent customers from cancelling dine-in orders
+    if (order.orderType === "dine-in") {
+      return res.status(403).json({
+        message: "Dine-in orders cannot be cancelled online. Please speak to your waiter.",
+      });
+    }
+
     // Only allow cancellation if order is not already delivered or cancelled
     if (order.orderStatus === "delivered" || order.orderStatus === "cancelled") {
       return res.status(400).json({
@@ -286,6 +327,135 @@ const addMenuItemReview = async (req: AuthRequest, res: Response) => {
   }
 };
 
+// @desc    Create a guest order (dine-in only, no authentication required)
+// @route   POST /api/customer/orders/guest
+// @access  Public
+const createGuestOrder = async (req: Request, res: Response) => {
+  try {
+    const { items, orderNotes, paymentMethod, orderType, tableNumber } = req.body as any;
+
+    // Only allow dine-in orders for guests
+    if (orderType !== "dine-in") {
+      return res.status(400).json({
+        message: "Guest orders are only allowed for dine-in. Please login for delivery orders.",
+      });
+    }
+
+    // Validate items array
+    if (!items || items.length === 0) {
+      return res.status(400).json({ message: "No order items provided" });
+    }
+
+    // Validate table number
+    if (!tableNumber) {
+      return res.status(400).json({
+        message: "Table number is required for dine-in orders",
+      });
+    }
+
+    // Check if table already has an active order
+    const activeTableOrder = await Order.findOne({
+      orderType: "dine-in",
+      tableNumber,
+      isCompleted: false,
+    });
+
+    if (activeTableOrder) {
+      return res.status(400).json({
+        message: `Table ${tableNumber} is currently occupied with an active order. Please choose another table.`,
+        existingOrder: {
+          orderNumber: activeTableOrder.orderNumber,
+          orderStatus: activeTableOrder.orderStatus,
+        },
+      });
+    }
+
+    // Process order items and calculate total
+    let orderItems: any[] = [];
+    let totalAmount = 0;
+
+    for (const item of items) {
+      const menuItem = await MenuItem.findById(item.menuItem);
+
+      if (!menuItem) {
+        return res.status(404).json({
+          message: `Menu item not found: ${item.menuItem}`,
+        });
+      }
+
+      if (!menuItem.isAvailable) {
+        return res.status(400).json({
+          message: `${menuItem.name} is currently unavailable`,
+        });
+      }
+
+      const subtotal = menuItem.price * item.quantity;
+
+      orderItems.push({
+        menuItem: menuItem._id,
+        name: menuItem.name,
+        quantity: item.quantity,
+        price: menuItem.price,
+        subtotal: subtotal,
+      });
+
+      totalAmount += subtotal;
+    }
+
+    // Calculate estimated delivery time (for dine-in, this is prep time)
+    const estimatedDeliveryTime = new Date(Date.now() + 30 * 60 * 1000);
+
+    // Create order without user (guest order)
+    const order = await Order.create({
+      user: null, // Guest order
+      items: orderItems,
+      totalAmount,
+      orderNotes,
+      paymentMethod: paymentMethod || "cash",
+      estimatedDeliveryTime,
+      orderType: "dine-in",
+      tableNumber,
+    });
+
+    // Populate order details (without user)
+    const populatedOrder = await Order.findById(order._id).populate(
+      "items.menuItem",
+      "name imageUrl",
+    );
+
+    res.status(201).json(populatedOrder);
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// @desc    Get guest order details by ID (public endpoint)
+// @route   GET /api/customer/orders/guest/:id
+// @access  Public
+const getGuestOrderById = async (req: Request, res: Response) => {
+  try {
+    const order = await Order.findById(req.params.id).populate(
+      "items.menuItem",
+      "name description imageUrl",
+    );
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // Only return orders that don't have a user (guest orders)
+    if (order.user) {
+      return res.status(403).json({
+        message: "This is not a guest order. Please login to view your orders.",
+      });
+    }
+
+    res.json(order);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   browseMenu,
   getMenuItemDetails,
@@ -295,4 +465,6 @@ module.exports = {
   getOrderDetails,
   cancelOrder,
   addMenuItemReview,
+  createGuestOrder,
+  getGuestOrderById,
 };

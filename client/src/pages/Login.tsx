@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 
 interface LoginForm {
   email: string;
@@ -12,6 +12,8 @@ const Login: React.FC = () => {
   const [error, setError] = useState<string>("");
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as any)?.from || null;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -20,6 +22,13 @@ const Login: React.FC = () => {
     try {
       const res = await login(formData.email, formData.password);
       if (res.success) {
+        // If user came from another page (e.g., checkout), redirect back there
+        if (from) {
+          navigate(from, { replace: true });
+          return;
+        }
+
+        // Otherwise, use role-based navigation
         switch (res.role) {
           case "admin":
             navigate("/admin");

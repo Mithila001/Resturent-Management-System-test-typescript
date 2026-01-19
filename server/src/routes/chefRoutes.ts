@@ -8,6 +8,7 @@ const {
   confirmOrder,
   getKitchenStats,
   updateMenuItemAvailability,
+  cancelOrder,
 } = require("../controllers/chefController");
 const { protect, authorize } = require("../middleware/authMiddleware");
 
@@ -24,6 +25,7 @@ router.get("/orders/:id", getOrderById);
 router.put("/orders/:id/confirm", confirmOrder);
 router.put("/orders/:id/start", startPreparingOrder);
 router.put("/orders/:id/ready", markOrderAsReady);
+router.put("/orders/:id/cancel", cancelOrder);
 
 // Menu item availability
 router.put("/menu/:id/availability", updateMenuItemAvailability);

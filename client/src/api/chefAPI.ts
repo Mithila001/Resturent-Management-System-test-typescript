@@ -29,6 +29,8 @@ export const chefAPI = {
   confirmOrder: (orderId: string) => api.put(`/chef/orders/${orderId}/confirm`),
   startPreparingOrder: (orderId: string) => api.put(`/chef/orders/${orderId}/start`),
   markOrderAsReady: (orderId: string) => api.put(`/chef/orders/${orderId}/ready`),
+  cancelOrder: (orderId: string, reason?: string) =>
+    api.put(`/chef/orders/${orderId}/cancel`, { reason }),
 
   // Menu item availability
   updateMenuItemAvailability: (menuItemId: string, isAvailable: boolean) =>

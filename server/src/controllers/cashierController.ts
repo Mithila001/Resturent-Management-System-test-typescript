@@ -10,9 +10,9 @@ const getOrdersForPayment = async (req: Request, res: Response) => {
   try {
     const { status, paymentStatus } = req.query as any;
 
-    // Cashier sees orders ready for payment or delivered
+    // Cashier sees orders ready for payment (served for dine-in, ready for delivery)
     let query: any = {
-      orderStatus: { $in: ["ready", "delivered"] },
+      orderStatus: { $in: ["ready", "served", "delivered", "dine-in-completed"] },
     };
 
     if (status) {
@@ -155,10 +155,10 @@ const getPaymentStats = async (req: Request, res: Response) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Count orders by payment status
+    // Count orders by payment status (both completed and active orders ready for payment)
     const pendingPayments = await Order.countDocuments({
       paymentStatus: "pending",
-      orderStatus: { $in: ["ready", "delivered"] },
+      orderStatus: { $in: ["ready", "served", "delivered", "dine-in-completed"] },
     });
 
     const paidOrders = await Order.countDocuments({

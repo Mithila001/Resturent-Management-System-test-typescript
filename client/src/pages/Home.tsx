@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { AuthContext, type User } from "../context/AuthContext";
 import "./Home.css";
@@ -17,6 +17,28 @@ interface PopularDish {
 
 const Home = () => {
   const { user } = useContext(AuthContext) as { user: User | null };
+  const [guestOrder, setGuestOrder] = useState<{ orderId: string; orderNumber: string } | null>(
+    null,
+  );
+
+  // Check for guest order in localStorage
+  useEffect(() => {
+    const storedOrder = localStorage.getItem("guestOrder");
+    if (storedOrder) {
+      try {
+        const orderData = JSON.parse(storedOrder);
+        // Check if order has expired (3 hours)
+        if (Date.now() < orderData.expiresAt) {
+          setGuestOrder({ orderId: orderData.orderId, orderNumber: orderData.orderNumber });
+        } else {
+          // Remove expired order
+          localStorage.removeItem("guestOrder");
+        }
+      } catch (error) {
+        console.error("Error parsing guest order:", error);
+      }
+    }
+  }, []);
 
   const features: Feature[] = [
     {
@@ -86,6 +108,28 @@ const Home = () => {
                   <br />
                   Fast delivery. Quality guaranteed.
                 </p>
+                {guestOrder && (
+                  <div
+                    style={{
+                      backgroundColor: "#e3f2fd",
+                      border: "2px solid #2196f3",
+                      padding: "1rem",
+                      borderRadius: "8px",
+                      marginBottom: "1rem",
+                      textAlign: "center",
+                    }}
+                  >
+                    <strong>Your Recent Dine-In Order:</strong> #{guestOrder.orderNumber}
+                    <br />
+                    <Link
+                      to={`/orders/guest/${guestOrder.orderId}`}
+                      className="btn btn-primary"
+                      style={{ marginTop: "0.5rem", display: "inline-block" }}
+                    >
+                      View Your Order
+                    </Link>
+                  </div>
+                )}
                 <div className="button-group">
                   <Link to="/menu" className="btn btn-primary btn-large">
                     Order Now

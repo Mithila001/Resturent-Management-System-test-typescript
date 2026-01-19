@@ -34,6 +34,8 @@ interface OrderDetails {
   estimatedDeliveryTime?: string;
   deliveredAt?: string;
   orderStatus: string;
+  orderType?: string;
+  tableNumber?: number;
 }
 
 type OrderStatusUpdate = { orderId: string; orderStatus: string };
@@ -172,6 +174,14 @@ const OrderTracking: React.FC = () => {
       return [{ key: "cancelled", label: "Cancelled", completed: true }];
     }
 
+    if (order.orderStatus === "delivered") {
+      return allSteps.map((step) => ({
+        ...step,
+        completed: true,
+        active: step.key === "delivered",
+      }));
+    }
+
     const currentIndex = allSteps.findIndex((step) => step.key === order.orderStatus);
     return allSteps.map((step, index) => ({
       ...step,
@@ -219,12 +229,30 @@ const OrderTracking: React.FC = () => {
   }
 
   const canCancel =
+    order.orderType !== "dine-in" && // Prevent dine-in cancellation
     order.orderStatus !== "delivered" &&
     order.orderStatus !== "cancelled" &&
     order.orderStatus !== "out-for-delivery";
 
   return (
     <div className="order-tracking-container">
+      {/* Dine-in Notice */}
+      {order.orderType === "dine-in" && (
+        <div
+          className="dine-in-notice"
+          style={{
+            backgroundColor: "#fff3cd",
+            border: "1px solid #ffc107",
+            padding: "1rem",
+            marginBottom: "1.5rem",
+            borderRadius: "8px",
+          }}
+        >
+          <strong>Dine-in Order:</strong> This order cannot be cancelled online. Please speak to
+          your waiter for any changes.
+        </div>
+      )}
+
       {/* Real-time notification banner */}
       {notification && (
         <div
@@ -270,6 +298,33 @@ const OrderTracking: React.FC = () => {
           ))}
         </div>
       </div>
+
+      {/* Delivered Status Banner */}
+      {order.orderStatus === "delivered" && (
+        <div
+          style={{
+            background: "linear-gradient(135deg, #4caf50 0%, #81c784 100%)",
+            color: "white",
+            padding: "2rem",
+            borderRadius: "12px",
+            textAlign: "center",
+            marginBottom: "2rem",
+            boxShadow: "0 4px 12px rgba(76, 175, 80, 0.3)",
+            animation: "fadeIn 0.5s ease",
+          }}
+        >
+          <div style={{ fontSize: "3rem", marginBottom: "0.5rem" }}>✅</div>
+          <div style={{ fontSize: "1.75rem", fontWeight: "bold", marginBottom: "0.5rem" }}>
+            Order Delivered!
+          </div>
+          <div style={{ fontSize: "1rem", opacity: 0.95 }}>
+            Your order was successfully delivered on {formatDate(order.deliveredAt)}
+          </div>
+          <div style={{ fontSize: "0.9rem", opacity: 0.9, marginTop: "0.5rem" }}>
+            Thank you for your order! We hope you enjoyed your meal.
+          </div>
+        </div>
+      )}
 
       <div className="order-details-grid">
         {/* Order Items */}

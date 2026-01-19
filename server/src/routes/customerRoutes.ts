@@ -9,6 +9,8 @@ const {
   getOrderDetails,
   cancelOrder,
   addMenuItemReview,
+  createGuestOrder,
+  getGuestOrderById,
 } = require("../controllers/customerController");
 const { protect, authorize } = require("../middleware/authMiddleware");
 
@@ -16,6 +18,10 @@ const { protect, authorize } = require("../middleware/authMiddleware");
 router.get("/menu", browseMenu);
 router.get("/menu/:id", getMenuItemDetails);
 router.get("/categories", getCategories);
+
+// Public routes - guest orders (dine-in only)
+router.post("/orders/guest", createGuestOrder);
+router.get("/orders/guest/:id", getGuestOrderById);
 
 // Protected customer routes
 router.post("/orders", protect, authorize("customer"), createOrder);

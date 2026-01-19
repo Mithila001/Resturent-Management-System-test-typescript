@@ -194,9 +194,7 @@ describe("Order API Tests", () => {
 
       Order.countDocuments.mockResolvedValue(1);
 
-      const res = await request(app)
-        .get("/api/orders")
-        .set("Authorization", `Bearer ${userToken}`);
+      const res = await request(app).get("/api/orders").set("Authorization", `Bearer ${userToken}`);
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toHaveProperty("orders");
@@ -351,6 +349,7 @@ describe("Order API Tests", () => {
         _id: orderId,
         user: "mockUserId123",
         orderStatus: "pending",
+        orderType: "delivery",
         save: jest.fn().mockResolvedValue(true),
       };
 
@@ -377,6 +376,7 @@ describe("Order API Tests", () => {
         _id: orderId,
         user: "mockUserId123",
         orderStatus: "delivered",
+        orderType: "delivery",
       });
 
       const res = await request(app)
@@ -385,6 +385,165 @@ describe("Order API Tests", () => {
 
       expect(res.statusCode).toBe(400);
       expect(res.body.message).toContain("Cannot cancel");
+    });
+
+    it("should not allow customers to cancel dine-in orders", async () => {
+      User.findById.mockReturnValue({
+        select: jest.fn().mockResolvedValue({
+          _id: "mockUserId123",
+          role: "customer",
+        }),
+      });
+
+      Order.findById.mockResolvedValue({
+        _id: orderId,
+        user: "mockUserId123",
+        orderStatus: "pending",
+        orderType: "dine-in",
+      });
+
+      const res = await request(app)
+        .delete(`/api/orders/${orderId}`)
+        .set("Authorization", `Bearer ${userToken}`);
+
+      expect(res.statusCode).toBe(403);
+      expect(res.body.message).toContain("Dine-in orders cannot be cancelled");
+    });
+  });
+
+  describe("Guest Order API Tests", () => {
+    describe("POST /api/customer/orders/guest", () => {
+      it("should create a guest dine-in order without authentication", async () => {
+        // Mock menu item lookup
+        MenuItem.findById.mockResolvedValue({
+          _id: menuItemId,
+          name: "Test Burger",
+          price: 12.99,
+          isAvailable: true,
+        });
+
+        // Mock order creation
+        const guestOrder = {
+          _id: "guestOrderId123",
+          user: null,
+          orderNumber: "ORD202512300002",
+          items: [
+            {
+              menuItem: menuItemId,
+              name: "Test Burger",
+              quantity: 1,
+              price: 12.99,
+              subtotal: 12.99,
+            },
+          ],
+          totalAmount: 12.99,
+          orderStatus: "pending",
+          paymentStatus: "pending",
+          paymentMethod: "cash",
+          orderType: "dine-in",
+          tableNumber: 5,
+        };
+
+        Order.create.mockResolvedValue(guestOrder);
+        Order.findById.mockReturnValue({
+          populate: jest.fn().mockResolvedValue(guestOrder),
+        });
+
+        const res = await request(app)
+          .post("/api/customer/orders/guest")
+          .send({
+            items: [{ menuItem: menuItemId, quantity: 1 }],
+            orderType: "dine-in",
+            tableNumber: 5,
+            paymentMethod: "cash",
+          });
+
+        expect(res.statusCode).toBe(201);
+        expect(res.body.user).toBeNull();
+        expect(res.body.orderType).toBe("dine-in");
+        expect(res.body.tableNumber).toBe(5);
+      });
+
+      it("should reject guest delivery orders", async () => {
+        const res = await request(app)
+          .post("/api/customer/orders/guest")
+          .send({
+            items: [{ menuItem: menuItemId, quantity: 1 }],
+            orderType: "delivery",
+            deliveryAddress: {
+              street: "123 Test St",
+              city: "Test City",
+              postalCode: "12345",
+              phone: "+1234567890",
+            },
+          });
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body.message).toContain("Guest orders are only allowed for dine-in");
+      });
+
+      it("should require table number for guest dine-in orders", async () => {
+        const res = await request(app)
+          .post("/api/customer/orders/guest")
+          .send({
+            items: [{ menuItem: menuItemId, quantity: 1 }],
+            orderType: "dine-in",
+            paymentMethod: "cash",
+          });
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body.message).toContain("Table number is required");
+      });
+    });
+
+    describe("GET /api/customer/orders/guest/:id", () => {
+      it("should retrieve a guest order by ID without authentication", async () => {
+        const guestOrder = {
+          _id: "guestOrderId123",
+          user: null,
+          orderNumber: "ORD202512300002",
+          items: [
+            {
+              menuItem: { name: "Test Burger", imageUrl: "/images/burger.jpg" },
+              name: "Test Burger",
+              quantity: 1,
+              price: 12.99,
+              subtotal: 12.99,
+            },
+          ],
+          totalAmount: 12.99,
+          orderType: "dine-in",
+          tableNumber: 5,
+        };
+
+        Order.findById.mockReturnValue({
+          populate: jest.fn().mockResolvedValue(guestOrder),
+        });
+
+        const res = await request(app).get("/api/customer/orders/guest/guestOrderId123");
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.user).toBeNull();
+        expect(res.body.orderType).toBe("dine-in");
+      });
+
+      it("should not allow retrieving authenticated user orders via guest endpoint", async () => {
+        const authenticatedOrder = {
+          _id: "orderId123",
+          user: "mockUserId123",
+          orderNumber: "ORD202512300003",
+          orderType: "delivery",
+        };
+
+        Order.findById.mockReturnValue({
+          populate: jest.fn().mockResolvedValue(authenticatedOrder),
+        });
+
+        const res = await request(app).get("/api/customer/orders/guest/orderId123");
+
+        expect(res.statusCode).toBe(403);
+        expect(res.body.message).toContain("not a guest order");
+      });
     });
   });
 });

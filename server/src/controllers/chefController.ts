@@ -11,9 +11,11 @@ const getKitchenOrders = async (req: Request, res: Response) => {
   try {
     const { status } = req.query as any;
 
-    // Chef sees orders that need preparation
+    // Chef sees orders that have been verified by waiter (confirmed and beyond)
+    // Pending orders are hidden until waiter verifies them
     let query: any = {
-      orderStatus: { $in: ["pending", "confirmed", "preparing"] },
+      isCompleted: false,
+      orderStatus: { $in: ["confirmed", "preparing"] },
     };
 
     if (status) {
@@ -232,6 +234,46 @@ const updateMenuItemAvailability = async (req: Request, res: Response) => {
   }
 };
 
+// @desc    Cancel order from kitchen
+// @route   PUT /api/chef/orders/:id/cancel
+// @access  Private (Chef)
+const cancelOrder = async (req: AuthRequest, res: Response) => {
+  try {
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // Cannot cancel already delivered or cancelled orders
+    if (["delivered", "cancelled", "served"].includes(order.orderStatus)) {
+      return res.status(400).json({
+        message: `Cannot cancel order with status: ${order.orderStatus}`,
+      });
+    }
+
+    order.orderStatus = "cancelled";
+    order.cancelledAt = new Date();
+    order.cancellationReason = req.body.reason || "Cancelled by kitchen staff";
+    await order.save();
+
+    // Emit socket event to notify waiter and customer
+    const io = req.app.get("socketio");
+    if (io) {
+      (io as any).emit("orderStatusUpdated", {
+        orderId: order._id,
+        orderNumber: order.orderNumber,
+        orderStatus: order.orderStatus,
+        userId: order.user,
+      });
+    }
+
+    res.json(order);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getKitchenOrders,
   getOrderById,
@@ -240,4 +282,5 @@ module.exports = {
   confirmOrder,
   getKitchenStats,
   updateMenuItemAvailability,
+  cancelOrder,
 };
