@@ -193,6 +193,7 @@ const createOrder = async (req: AuthRequest, res: Response) => {
       deliveryAddress: orderType === "delivery" ? deliveryAddress : undefined,
       orderNotes,
       paymentMethod: paymentMethod || "cash",
+      paymentStatus: paymentMethod === "online" ? "paid" : "pending", // Online payments are considered paid immediately
       estimatedDeliveryTime,
       orderType: orderType || "delivery",
       tableNumber: orderType === "dine-in" ? tableNumber : undefined,
@@ -413,6 +414,7 @@ const createGuestOrder = async (req: Request, res: Response) => {
       totalAmount,
       orderNotes,
       paymentMethod: paymentMethod || "cash",
+      paymentStatus: paymentMethod === "online" ? "paid" : "pending", // Online payments are considered paid immediately
       estimatedDeliveryTime,
       orderType: "dine-in",
       tableNumber,

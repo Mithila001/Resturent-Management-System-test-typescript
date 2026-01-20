@@ -11,8 +11,10 @@ const getOrdersForPayment = async (req: Request, res: Response) => {
     const { status, paymentStatus } = req.query as any;
 
     // Cashier sees orders ready for payment (served for dine-in, ready for delivery)
+    // Only show orders that require manual payment processing (cash/card)
     let query: any = {
       orderStatus: { $in: ["ready", "served", "delivered", "dine-in-completed"] },
+      paymentMethod: { $in: ["cash", "card"] },
     };
 
     if (status) {
@@ -82,6 +84,15 @@ const processPayment = async (req: AuthRequest, res: Response) => {
     order.paymentStatus = "paid";
     order.paymentMethod = paymentMethod || order.paymentMethod;
 
+    // Auto-dispatch delivery orders after payment
+    const shouldDispatchDelivery =
+      order.orderType === "delivery" &&
+      ["ready", "confirmed", "preparing"].includes(order.orderStatus);
+
+    if (shouldDispatchDelivery) {
+      order.orderStatus = "out-for-delivery";
+    }
+
     // Add payment metadata (can extend Order model to include this)
     // order.paymentDetails = { amountPaid, transactionId, paidAt: new Date() };
 
@@ -96,6 +107,15 @@ const processPayment = async (req: AuthRequest, res: Response) => {
         paymentStatus: order.paymentStatus,
         userId: order.user,
       });
+
+      if (shouldDispatchDelivery) {
+        (io as any).emit("orderStatusUpdated", {
+          orderId: order._id,
+          orderNumber: order.orderNumber,
+          orderStatus: order.orderStatus,
+          userId: order.user,
+        });
+      }
     }
 
     res.json({

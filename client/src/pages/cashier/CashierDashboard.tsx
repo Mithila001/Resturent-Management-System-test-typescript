@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { cashierAPI } from "../../api/cashierAPI";
 import { useSocket } from "../../context/SocketContext";
-import API_URL from "../../config/api";
 import type { Socket } from "socket.io-client";
 
 interface OrderItem {
@@ -90,21 +88,6 @@ const CashierDashboard = () => {
         paymentMethod: "cash",
         amountPaid: amount,
       });
-
-      // For delivery orders, also update status to out-for-delivery
-      if (selectedOrder.orderType === "delivery") {
-        const token = localStorage.getItem("token");
-        await axios.put(
-          `${API_URL}/orders/${selectedOrder._id}/status`,
-          { orderStatus: "out-for-delivery" },
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-      }
 
       alert(`Payment successful! Change: $${(amount - selectedOrder.totalAmount).toFixed(2)}`);
       setSelectedOrder(null);

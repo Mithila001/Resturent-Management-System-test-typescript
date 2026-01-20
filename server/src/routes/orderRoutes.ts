@@ -31,10 +31,10 @@ router.route("/").post(authorize("customer"), createOrder).get(getOrders);
 // Get, update, cancel specific order
 router.route("/:id").get(getOrderById).delete(cancelOrder);
 
-// Update order status (waiter, chef, admin, manager, owner)
+// Update order status (waiter, chef, cashier, admin, manager, owner)
 router.put(
   "/:id/status",
-  authorize("admin", "manager", "owner", "chef", "waiter"),
+  authorize("admin", "manager", "owner", "chef", "waiter", "cashier"),
   updateOrderStatus
 );
 

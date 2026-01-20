@@ -89,6 +89,7 @@ const createOrder = async (req: AuthRequest, res: Response) => {
       deliveryAddress: orderType === "delivery" ? deliveryAddress : undefined,
       orderNotes,
       paymentMethod: paymentMethod || "cash",
+      paymentStatus: paymentMethod === "online" ? "paid" : "pending", // Online payments are considered paid immediately
       estimatedDeliveryTime,
       orderType: orderType || "delivery",
       tableNumber,
