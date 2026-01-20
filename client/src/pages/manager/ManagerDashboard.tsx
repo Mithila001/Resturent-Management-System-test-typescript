@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { managerAPI } from "../../api/managerAPI";
 import { Link } from "react-router-dom";
+import DashboardStats from "../../components/DashboardStats";
 
 const ManagerDashboard = () => {
   const [stats, setStats] = useState({
@@ -15,11 +16,28 @@ const ManagerDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await managerAPI.getDashboardStats("today");
-        setStats(response.data);
+        const response = await managerAPI.getDashboardStats("all");
+        const data = response.data;
+
+        // Handle error values (-1) gracefully
+        setStats({
+          totalOrders: data.totalOrders ?? 0,
+          pendingOrders: data.pendingOrders ?? 0,
+          completedOrders: data.completedOrders ?? 0,
+          cancelledOrders: data.cancelledOrders ?? 0,
+          totalRevenue: data.totalRevenue ?? 0,
+        });
         setLoading(false);
       } catch (err) {
         console.error("Failed to fetch stats:", err);
+        // Set all to -1 on error
+        setStats({
+          totalOrders: -1,
+          pendingOrders: -1,
+          completedOrders: -1,
+          cancelledOrders: -1,
+          totalRevenue: -1,
+        });
         setLoading(false);
       }
     };
@@ -48,45 +66,35 @@ const ManagerDashboard = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="stats-overview">
-        <div className="stat-card-large revenue">
-          <div className="stat-header">
-            <span className="stat-icon">💰</span>
-            <h3>Total Revenue</h3>
-          </div>
-          <div className="stat-value-large">${stats.totalRevenue.toFixed(2)}</div>
-          <div className="stat-change positive">
-            <span>↑</span> 12.5% from last month
-          </div>
-        </div>
-
-        <div className="stat-card-large orders">
-          <div className="stat-header">
-            <span className="stat-icon">📦</span>
-            <h3>Total Orders</h3>
-          </div>
-          <div className="stat-value-large">{stats.totalOrders}</div>
-          <div className="stat-detail">All time orders</div>
-        </div>
-
-        <div className="stat-card-large pending">
-          <div className="stat-header">
-            <span className="stat-icon">⏳</span>
-            <h3>Pending Orders</h3>
-          </div>
-          <div className="stat-value-large">{stats.pendingOrders}</div>
-          <div className="stat-detail">Requires attention</div>
-        </div>
-
-        <div className="stat-card-large completed">
-          <div className="stat-header">
-            <span className="stat-icon">✅</span>
-            <h3>Completed</h3>
-          </div>
-          <div className="stat-value-large">{stats.completedOrders}</div>
-          <div className="stat-detail">Successfully delivered</div>
-        </div>
-      </div>
+      <DashboardStats
+        stats={[
+          {
+            icon: "💰",
+            title: "Total Revenue",
+            value: stats.totalRevenue === -1 ? "Error" : `$${stats.totalRevenue.toFixed(2)}`,
+            change: { value: "↑ 12.5% from last month", type: "positive" },
+            variant: "primary",
+          },
+          {
+            icon: "📦",
+            title: "Total Orders",
+            value: stats.totalOrders === -1 ? "Error" : stats.totalOrders,
+            subtext: "All time orders",
+          },
+          {
+            icon: "⏳",
+            title: "Pending Orders",
+            value: stats.pendingOrders === -1 ? "Error" : stats.pendingOrders,
+            subtext: "Requires attention",
+          },
+          {
+            icon: "✅",
+            title: "Completed",
+            value: stats.completedOrders === -1 ? "Error" : stats.completedOrders,
+            subtext: "Successfully delivered",
+          },
+        ]}
+      />
 
       {/* Quick Links */}
       <div className="section">

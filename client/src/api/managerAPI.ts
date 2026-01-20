@@ -20,6 +20,10 @@ api.interceptors.request.use((config) => {
 
 // Manager API endpoints
 export const managerAPI = {
+  // Dashboard statistics
+  getDashboardStats: (period?: "today" | "week" | "month" | "all") =>
+    api.get("/manager/dashboard-stats", { params: { period } }),
+
   // Analytics and reporting
   getAnalytics: (params?: { startDate?: string; endDate?: string }) =>
     api.get("/manager/analytics", { params }),

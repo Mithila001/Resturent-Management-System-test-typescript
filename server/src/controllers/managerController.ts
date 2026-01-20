@@ -336,6 +336,85 @@ const updateMenuItem = async (req: Request, res: Response) => {
   }
 };
 
+// @desc    Get dashboard statistics for manager
+// @route   GET /api/manager/dashboard-stats
+// @access  Private (Manager)
+const getDashboardStats = async (req: Request, res: Response) => {
+  try {
+    const { period = "today" } = req.query as any;
+
+    // Calculate date range based on period
+    let startDate = new Date();
+    const endDate = new Date();
+
+    if (period === "today") {
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 999);
+    } else if (period === "week") {
+      startDate.setDate(startDate.getDate() - 7);
+      startDate.setHours(0, 0, 0, 0);
+    } else if (period === "month") {
+      startDate.setDate(1);
+      startDate.setHours(0, 0, 0, 0);
+    } else if (period === "all") {
+      startDate = new Date(0); // Beginning of time
+    }
+
+    const dateFilter = { createdAt: { $gte: startDate, $lte: endDate } };
+
+    // Aggregate order statistics
+    const [totalOrders, pendingOrders, completedOrders, cancelledOrders] = await Promise.all([
+      Order.countDocuments(dateFilter).catch(() => -1),
+      Order.countDocuments({ ...dateFilter, orderStatus: "pending" }).catch(() => -1),
+      Order.countDocuments({
+        ...dateFilter,
+        orderStatus: { $in: ["delivered", "served", "dine-in-completed"] },
+        isCompleted: true,
+      }).catch(() => -1),
+      Order.countDocuments({ ...dateFilter, orderStatus: "cancelled" }).catch(() => -1),
+    ]);
+
+    // Calculate total revenue from completed paid orders
+    const revenueData = await Order.aggregate([
+      {
+        $match: {
+          ...dateFilter,
+          paymentStatus: "paid",
+          orderStatus: { $in: ["delivered", "served", "dine-in-completed"] },
+          isCompleted: true,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: "$totalAmount" },
+        },
+      },
+    ]).catch(() => [{ totalRevenue: -1 }]);
+
+    const totalRevenue = revenueData.length > 0 ? revenueData[0].totalRevenue : 0;
+
+    res.json({
+      totalOrders,
+      pendingOrders,
+      completedOrders,
+      cancelledOrders,
+      totalRevenue,
+      period,
+    });
+  } catch (error: any) {
+    console.error("Error fetching manager dashboard stats:", error);
+    res.status(500).json({
+      message: error.message,
+      totalOrders: -1,
+      pendingOrders: -1,
+      completedOrders: -1,
+      cancelledOrders: -1,
+      totalRevenue: -1,
+    });
+  }
+};
+
 module.exports = {
   getAnalytics,
   getStaffPerformance,
@@ -344,4 +423,5 @@ module.exports = {
   getReports,
   getCustomerInsights,
   updateMenuItem,
+  getDashboardStats,
 };

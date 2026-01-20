@@ -8,12 +8,16 @@ const {
   getReports,
   getCustomerInsights,
   updateMenuItem,
+  getDashboardStats,
 } = require("../controllers/managerController");
 const { protect, authorize } = require("../middleware/authMiddleware");
 
 // All routes require manager authentication
 router.use(protect);
 router.use(authorize("manager"));
+
+// Dashboard statistics
+router.get("/dashboard-stats", getDashboardStats);
 
 // Analytics and reporting
 router.get("/analytics", getAnalytics);

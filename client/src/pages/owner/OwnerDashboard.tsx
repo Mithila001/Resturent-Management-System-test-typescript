@@ -1,6 +1,7 @@
 // Owner/Admin Dashboard - High-level restaurant overview and controls
 import React, { useState, useEffect } from "react";
 import { ownerAPI } from "../../api/ownerAPI";
+import DashboardStats from "../../components/DashboardStats";
 
 interface BusinessMetrics {
   totalRevenue: number;
@@ -38,10 +39,40 @@ const OwnerDashboard: React.FC = () => {
 
   const fetchBusinessMetrics = async () => {
     try {
-      const response = await ownerAPI.getBusinessMetrics();
-      setMetrics(response.data);
+      const response = await ownerAPI.getDashboardStats();
+      const data = response.data;
+
+      console.log("Owner Dashboard API Response:", data);
+
+      // Transform and handle error values (-1) gracefully
+      setMetrics({
+        totalRevenue: data.totalRevenue !== undefined ? data.totalRevenue : 0,
+        monthlyRevenue: data.monthlyRevenue !== undefined ? data.monthlyRevenue : 0,
+        yearlyRevenue: data.yearlyRevenue !== undefined ? data.yearlyRevenue : 0,
+        totalOrders: data.totalOrders !== undefined ? data.totalOrders : 0,
+        totalCustomers: data.totalCustomers !== undefined ? data.totalCustomers : 0,
+        averageOrderValue: data.averageOrderValue !== undefined ? data.averageOrderValue : 0,
+        customerRetentionRate:
+          data.customerRetentionRate !== undefined ? data.customerRetentionRate : 0,
+        profitMargin: data.profitMargin !== undefined ? data.profitMargin : 0,
+        staffCount: data.staffCount !== undefined ? data.staffCount : 0,
+        inventoryValue: data.inventoryValue !== undefined ? data.inventoryValue : 0,
+      });
     } catch (error) {
       console.error("Failed to fetch business metrics:", error);
+      // Set all to -1 on error
+      setMetrics({
+        totalRevenue: -1,
+        monthlyRevenue: -1,
+        yearlyRevenue: -1,
+        totalOrders: -1,
+        totalCustomers: -1,
+        averageOrderValue: -1,
+        customerRetentionRate: -1,
+        profitMargin: -1,
+        staffCount: -1,
+        inventoryValue: -1,
+      });
     }
   };
 
@@ -107,64 +138,76 @@ const OwnerDashboard: React.FC = () => {
       {/* Overview Section */}
       {selectedView === "overview" && metrics && (
         <div className="overview-section">
-          <div className="kpi-grid">
-            <div className="kpi-card primary">
-              <div className="kpi-header">
-                <h3>💰 Total Revenue</h3>
-                <div className="kpi-period">All Time</div>
-              </div>
-              <div className="kpi-value">${metrics.totalRevenue.toLocaleString()}</div>
-              <div className="kpi-submetrics">
-                <span>Monthly: ${metrics.monthlyRevenue.toLocaleString()}</span>
-                <span>Yearly: ${metrics.yearlyRevenue.toLocaleString()}</span>
-              </div>
-            </div>
-
-            <div className="kpi-card">
-              <div className="kpi-header">
-                <h3>📋 Total Orders</h3>
-                <div className="kpi-change positive">+12% vs last month</div>
-              </div>
-              <div className="kpi-value">{metrics.totalOrders.toLocaleString()}</div>
-            </div>
-
-            <div className="kpi-card">
-              <div className="kpi-header">
-                <h3>👥 Customer Base</h3>
-                <div className="kpi-change positive">
-                  Retention: {metrics.customerRetentionRate}%
-                </div>
-              </div>
-              <div className="kpi-value">{metrics.totalCustomers.toLocaleString()}</div>
-            </div>
-
-            <div className="kpi-card">
-              <div className="kpi-header">
-                <h3>📈 Avg Order Value</h3>
-                <div className="kpi-change neutral">+2.3% vs last month</div>
-              </div>
-              <div className="kpi-value">${metrics.averageOrderValue.toFixed(2)}</div>
-            </div>
-
-            <div className="kpi-card">
-              <div className="kpi-header">
-                <h3>💹 Profit Margin</h3>
-                <div className="kpi-change positive">+1.5% vs last month</div>
-              </div>
-              <div className="kpi-value">{metrics.profitMargin.toFixed(1)}%</div>
-            </div>
-
-            <div className="kpi-card">
-              <div className="kpi-header">
-                <h3>🏪 Business Health</h3>
-                <div className="health-indicators">
-                  <span className="indicator good">📈 Growing</span>
-                  <span className="indicator excellent">💎 Profitable</span>
-                </div>
-              </div>
-              <div className="kpi-value">Excellent</div>
-            </div>
-          </div>
+          <DashboardStats
+            stats={[
+              {
+                icon: "💰",
+                title: "Total Revenue",
+                value:
+                  metrics.totalRevenue === -1
+                    ? "Error"
+                    : `$${metrics.totalRevenue.toLocaleString()}`,
+                subtext: "All Time",
+                submetrics: [
+                  {
+                    label: "Monthly",
+                    value:
+                      metrics.monthlyRevenue === -1
+                        ? "Error"
+                        : `$${metrics.monthlyRevenue.toLocaleString()}`,
+                  },
+                  {
+                    label: "Yearly",
+                    value:
+                      metrics.yearlyRevenue === -1
+                        ? "Error"
+                        : `$${metrics.yearlyRevenue.toLocaleString()}`,
+                  },
+                ],
+                variant: "primary",
+              },
+              {
+                icon: "📋",
+                title: "Total Orders",
+                value: metrics.totalOrders === -1 ? "Error" : metrics.totalOrders,
+                change: { value: "+12% vs last month", type: "positive" },
+              },
+              {
+                icon: "👥",
+                title: "Customer Base",
+                value: metrics.totalCustomers === -1 ? "Error" : metrics.totalCustomers,
+                change: {
+                  value:
+                    metrics.customerRetentionRate === -1
+                      ? "Error"
+                      : `Retention: ${metrics.customerRetentionRate}%`,
+                  type: "positive",
+                },
+              },
+              {
+                icon: "📈",
+                title: "Avg Order Value",
+                value:
+                  metrics.averageOrderValue === -1
+                    ? "Error"
+                    : `$${metrics.averageOrderValue.toFixed(2)}`,
+                change: { value: "+2.3% vs last month", type: "neutral" },
+              },
+              {
+                icon: "💹",
+                title: "Profit Margin",
+                value:
+                  metrics.profitMargin === -1 ? "Error" : `${metrics.profitMargin.toFixed(1)}%`,
+                change: { value: "+1.5% vs last month", type: "positive" },
+              },
+              {
+                icon: "🏪",
+                title: "Business Health",
+                value: "Excellent",
+                subtext: "📈 Growing • 💎 Profitable",
+              },
+            ]}
+          />
         </div>
       )}
 
@@ -238,7 +281,9 @@ const OwnerDashboard: React.FC = () => {
           <div className="operational-grid">
             <div className="operational-card">
               <h3>👥 Staff Management</h3>
-              <div className="stat-value">{metrics.staffCount} employees</div>
+              <div className="stat-value">
+                {metrics.staffCount === -1 ? "Error" : `${metrics.staffCount} employees`}
+              </div>
               <div className="operational-actions">
                 <button className="action-btn">View Staff</button>
                 <button className="action-btn">Schedules</button>
@@ -248,7 +293,11 @@ const OwnerDashboard: React.FC = () => {
 
             <div className="operational-card">
               <h3>📦 Inventory Value</h3>
-              <div className="stat-value">${metrics.inventoryValue.toLocaleString()}</div>
+              <div className="stat-value">
+                {metrics.inventoryValue === -1
+                  ? "Error"
+                  : `$${metrics.inventoryValue.toLocaleString()}`}
+              </div>
               <div className="operational-actions">
                 <button className="action-btn">View Inventory</button>
                 <button className="action-btn">Suppliers</button>

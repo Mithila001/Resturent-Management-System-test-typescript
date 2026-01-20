@@ -20,6 +20,9 @@ api.interceptors.request.use((config) => {
 
 // Owner API endpoints
 export const ownerAPI = {
+  // Dashboard statistics
+  getDashboardStats: () => api.get("/owner/dashboard-stats"),
+
   // Financial overview
   getFinancialOverview: (params?: { year?: number; month?: number }) =>
     api.get("/owner/financial-overview", { params }),

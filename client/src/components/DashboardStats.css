@@ -1,0 +1,308 @@
+/* Dashboard Stats Component Styles */
+
+.dashboard-stats {
+  width: 100%;
+}
+
+/* New aliases and structural helpers to match component markup */
+.dashboard-stat-card {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-width: 240px;
+  max-width: 320px;
+}
+
+.stat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.04);
+  flex-shrink: 0;
+  font-size: 1.25rem;
+}
+
+.stat-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #4a5568;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dashboard-stats.grid-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.dashboard-stats.compact-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+/* Stat Card */
+.stat-card {
+  background: var(--surface-color);
+  border-radius: var(--radius-lg, 16px);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.08));
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    background-color 150ms ease;
+  border: 1px solid var(--border-color);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Light theme: subtle warm (light orange) card tint instead of plain white */
+.light-theme .stat-card {
+  /* primary color #ff6b35 -> rgb(255,107,53) used with low alpha for a soft tint */
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.06), rgba(255, 107, 53, 0.02));
+  border-color: rgba(255, 107, 53, 0.06);
+}
+
+.stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover, 0 12px 24px rgba(0, 0, 0, 0.12));
+}
+
+.stat-card:hover::before {
+  opacity: 1;
+}
+
+.stat-card.primary-card {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+  color: var(--text-on-primary, #fff);
+  border: none;
+}
+
+.stat-card.primary-card::before {
+  background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
+}
+
+.stat-card.primary-card .stat-header h3,
+.stat-card.primary-card .stat-value,
+.stat-card.primary-card .stat-subtext,
+.stat-card.primary-card .stat-submetrics {
+  color: var(--text-on-primary, #fff);
+}
+
+.stat-card.primary-card .stat-change {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(6px);
+}
+
+/* Stat Header */
+.stat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  gap: 0.5rem;
+}
+
+.stat-header h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #4a5568;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  line-height: 1.4;
+}
+
+/* Stat Value */
+.stat-value {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0.75rem 0;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+/* Stat Change Badge */
+.stat-change {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.stat-change.positive {
+  background: linear-gradient(135deg, var(--success-color) 0%, #009874 100%);
+  color: #fff;
+  border: none;
+}
+
+.stat-change.negative {
+  background: linear-gradient(135deg, var(--error-color) 0%, #c62828 100%);
+  color: #fff;
+  border: none;
+}
+
+.stat-change.neutral {
+  background: var(--surface-color);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+/* Stat Subtext */
+.stat-subtext {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+
+.stat-card.primary-card .stat-subtext {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Stat Submetrics */
+.stat-submetrics {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.stat-card.primary-card .stat-submetrics {
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+
+.stat-submetrics span {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stat-card.primary-card .stat-submetrics span {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .dashboard-stats.grid-layout {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-stats.grid-layout,
+  .dashboard-stats.compact-layout {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .stat-card {
+    padding: 1.5rem;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+  }
+
+  .stat-header {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .stat-change {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .stat-card {
+    padding: 1.25rem;
+  }
+
+  .stat-value {
+    font-size: 1.75rem;
+  }
+
+  .stat-header h3 {
+    font-size: 0.875rem;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  /* Use the app's dark theme tokens (defined in index.css .dark-theme)
+     and avoid extremely dark, near-black cards. */
+  .stat-card {
+    background: var(--surface-color); /* typically a soft dark slate */
+    border-color: rgba(255, 255, 255, 0.06);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Keep primary cards using the primary gradient (dark-theme vars already set)
+     so they remain vibrant on dark backgrounds. */
+  .stat-card.primary-card {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+    color: var(--text-on-primary, #fff);
+  }
+
+  .stat-header h3 {
+    color: var(--text-primary);
+  }
+
+  .stat-value {
+    color: var(--text-primary);
+  }
+
+  .stat-subtext,
+  .stat-submetrics span {
+    color: var(--text-secondary);
+  }
+
+  .stat-submetrics {
+    border-top-color: rgba(255, 255, 255, 0.04);
+  }
+
+  /* Slightly softer neutral badge on dark mode */
+  .stat-change.neutral {
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+  }
+}

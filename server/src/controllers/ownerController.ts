@@ -420,6 +420,155 @@ const exportFinancialReport = async (req: Request, res: Response) => {
   }
 };
 
+// @desc    Get comprehensive dashboard statistics for owner
+// @route   GET /api/owner/dashboard-stats
+// @access  Private (Owner, Admin)
+const getDashboardStats = async (req: Request, res: Response) => {
+  try {
+    const currentDate = new Date();
+
+    // Calculate date ranges
+    const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const endOfMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      0,
+      23,
+      59,
+      59,
+    );
+    const startOfYear = new Date(currentDate.getFullYear(), 0, 1);
+    const endOfYear = new Date(currentDate.getFullYear(), 11, 31, 23, 59, 59);
+
+    // All-time revenue and orders
+    const allTimeStats = await Order.aggregate([
+      {
+        $match: {
+          paymentStatus: "paid",
+          orderStatus: { $in: ["delivered", "served", "dine-in-completed"] },
+          isCompleted: true,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: "$totalAmount" },
+          totalOrders: { $sum: 1 },
+          averageOrderValue: { $avg: "$totalAmount" },
+        },
+      },
+    ]).catch(() => []);
+
+    // Monthly revenue
+    const monthlyStats = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startOfMonth, $lte: endOfMonth },
+          paymentStatus: "paid",
+          orderStatus: { $in: ["delivered", "served", "dine-in-completed"] },
+          isCompleted: true,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          monthlyRevenue: { $sum: "$totalAmount" },
+        },
+      },
+    ]).catch(() => []);
+
+    // Yearly revenue
+    const yearlyStats = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startOfYear, $lte: endOfYear },
+          paymentStatus: "paid",
+          orderStatus: { $in: ["delivered", "served", "dine-in-completed"] },
+          isCompleted: true,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          yearlyRevenue: { $sum: "$totalAmount" },
+        },
+      },
+    ]).catch(() => []);
+
+    // Customer metrics
+    const [totalCustomers, activeCustomers] = await Promise.all([
+      User.countDocuments({ role: "customer" }).catch(() => -1),
+      Order.distinct("user", {
+        createdAt: { $gte: startOfMonth, $lte: endOfMonth },
+        paymentStatus: "paid",
+        isCompleted: true,
+      })
+        .then((ids: any) => ids.length)
+        .catch(() => -1),
+    ]);
+
+    // Calculate customer retention rate
+    const customerRetentionRate =
+      totalCustomers > 0 && activeCustomers >= 0
+        ? ((activeCustomers / totalCustomers) * 100).toFixed(1)
+        : 0;
+
+    // Staff count
+    const staffCount = await User.countDocuments({
+      role: { $in: ["chef", "waiter", "cashier", "manager"] },
+    }).catch(() => -1);
+
+    // Inventory value
+    const inventoryStats = await Inventory.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalValue: {
+            $sum: { $multiply: ["$quantity", "$pricePerUnit"] },
+          },
+        },
+      },
+    ]).catch(() => []);
+
+    // Profit analysis (basic calculation: assuming 30% cost)
+    const totalRevenue = allTimeStats.length > 0 ? allTimeStats[0].totalRevenue : 0;
+    const estimatedCost = totalRevenue * 0.3;
+    const estimatedProfit = totalRevenue - estimatedCost;
+    const profitMargin = totalRevenue > 0 ? ((estimatedProfit / totalRevenue) * 100).toFixed(1) : 0;
+
+    const responseData = {
+      totalRevenue: allTimeStats.length > 0 ? allTimeStats[0].totalRevenue : 0,
+      monthlyRevenue: monthlyStats.length > 0 ? monthlyStats[0].monthlyRevenue : 0,
+      yearlyRevenue: yearlyStats.length > 0 ? yearlyStats[0].yearlyRevenue : 0,
+      totalOrders: allTimeStats.length > 0 ? allTimeStats[0].totalOrders : 0,
+      totalCustomers,
+      averageOrderValue: allTimeStats.length > 0 ? allTimeStats[0].averageOrderValue : 0,
+      customerRetentionRate: parseFloat(customerRetentionRate as string),
+      profitMargin: parseFloat(profitMargin as string),
+      staffCount,
+      inventoryValue: inventoryStats.length > 0 ? inventoryStats[0].totalValue : 0,
+    };
+
+    console.log("Owner Dashboard Stats Response:", responseData);
+    res.json(responseData);
+  } catch (error: any) {
+    console.error("Error fetching owner dashboard stats:", error);
+    res.status(500).json({
+      message: error.message,
+      totalRevenue: -1,
+      monthlyRevenue: -1,
+      yearlyRevenue: -1,
+      totalOrders: -1,
+      totalCustomers: -1,
+      averageOrderValue: -1,
+      customerRetentionRate: -1,
+      profitMargin: -1,
+      staffCount: -1,
+      inventoryValue: -1,
+    });
+  }
+};
+
 module.exports = {
   getFinancialOverview,
   getProfitAnalysis,
@@ -427,4 +576,5 @@ module.exports = {
   getSystemStats,
   getComparativeAnalysis,
   exportFinancialReport,
+  getDashboardStats,
 };

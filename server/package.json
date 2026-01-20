@@ -12,9 +12,11 @@
     "seed:users": "node -r ts-node/register seed/seedUsers.ts",
     "seed:tables": "node -r ts-node/register seed/seedTables.ts",
     "seed:data": "node -r ts-node/register seed/seedData.ts",
+    "seed:orders": "node -r ts-node/register seed/seedOrders.ts",
     "seed:production": "node -r ts-node/register seed/seedProduction.ts",
     "seed:all": "node -r ts-node/register seed/seedProduction.ts",
-    "migrate:isCompleted": "node -r ts-node/register seed/migrateIsCompleted.ts"
+    "migrate:isCompleted": "node -r ts-node/register seed/migrateIsCompleted.ts",
+    "migrate:orders": "node -r ts-node/register seed/migrateOrders.ts"
   },
   "keywords": [],
   "author": "",

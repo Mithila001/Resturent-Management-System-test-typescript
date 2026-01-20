@@ -22,7 +22,7 @@ import WaiterDashboard from "./pages/waiter/WaiterDashboard";
 import ChefDashboard from "./pages/kitchen/ChefDashboard";
 import CashierDashboard from "./pages/cashier/CashierDashboard";
 import ManagerDashboard from "./pages/manager/ManagerDashboard";
-import OwnerDashboard from "./pages/admin/OwnerDashboard";
+import OwnerDashboard from "./pages/owner/OwnerDashboard";
 import InventoryDashboard from "./pages/inventory/InventoryDashboard";
 
 // ... existing imports

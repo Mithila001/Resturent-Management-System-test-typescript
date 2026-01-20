@@ -67,22 +67,13 @@ const Home = () => {
                   Fast delivery. Quality guaranteed.
                 </p>
                 {guestOrder && (
-                  <div
-                    style={{
-                      backgroundColor: "#e3f2fd",
-                      border: "2px solid #2196f3",
-                      padding: "1rem",
-                      borderRadius: "8px",
-                      marginBottom: "1rem",
-                      textAlign: "center",
-                    }}
-                  >
-                    <strong>Your Recent Dine-In Order:</strong> #{guestOrder.orderNumber}
-                    <br />
+                  <div className="guest-order-notification">
+                    <div className="guest-order-message">
+                      <strong>Your Recent Dine-In Order:</strong> #{guestOrder.orderNumber}
+                    </div>
                     <Link
                       to={`/orders/guest/${guestOrder.orderId}`}
-                      className="btn btn-primary"
-                      style={{ marginTop: "0.5rem", display: "inline-block" }}
+                      className="btn btn-primary guest-order-button"
                     >
                       View Your Order
                     </Link>
