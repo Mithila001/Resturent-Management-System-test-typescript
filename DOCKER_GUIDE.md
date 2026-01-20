@@ -12,10 +12,14 @@ docker-compose up -d
 
 # View logs
 docker-compose logs -f
+```
 
-# View logs for specific service
-docker-compose logs -f server
-docker-compose logs -f client
+### Seeding Data (First Run)
+After starting the containers, you need to populate the database with initial data:
+
+```bash
+# Run the seed script inside the running server container
+docker-compose exec server node dist/seed/seedProduction.js
 ```
 
 ### Stop Services
@@ -65,6 +69,8 @@ cp .env.example .env
 - `SERVER_PORT` - Backend server port (default: 5000)
 - `CLIENT_PORT` - Frontend app port (default: 3000)
 
+*(Note: `VITE_API_URL` is omitted as the intention is to run standard local builds)*
+
 ---
 
 ## Useful Docker Commands
@@ -108,13 +114,6 @@ docker-compose down -v
 docker-compose up --build
 ```
 
-### Port Already in Use
-Edit `.env` and change the port:
-```
-SERVER_PORT=5001
-CLIENT_PORT=3001
-```
-
 ### Database Connection Issues
 Make sure MongoDB is healthy:
 ```bash
@@ -124,28 +123,6 @@ docker-compose ps
 
 ---
 
-## Development Tips
-
-### Hot Reload
-Both server and client support hot reload in Docker:
-- Server: Uses nodemon
-- Client: Vite dev server
-
-### Volume Mounts
-Code changes are reflected immediately (no rebuild needed for development).
-
-### Production Build
-For production, Docker uses multi-stage builds:
-- Smaller image sizes
-- Only production dependencies
-- Optimized builds
-
----
-
 ## Team Members: Danidu & Mithila
 
 This Docker setup is maintained by Danidu and Mithila. For questions or improvements, contact them or create a GitHub issue.
-
-**Commit Responsibilities**:
-- **Danidu**: docker-compose.yml, server Dockerfile tweaks
-- **Mithila**: CI/CD Docker builds, deployment configs
