@@ -13,6 +13,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Checkout from "./pages/Checkout";
 import OrderHistory from "./pages/OrderHistory";
 import OrderTracking from "./pages/OrderTracking";
+import GuestOrderTracking from "./pages/GuestOrderTracking";
 import Cart from "./components/Cart";
 import ErrorBoundary from "./components/ErrorBoundary";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -216,20 +217,18 @@ function App() {
                     <Route path="/register" element={<Register />} />
                     <Route path="/menu" element={<Menu />} />
 
+                    {/* Public guest order tracking */}
+                    <Route path="/orders/guest/:orderId" element={<GuestOrderTracking />} />
+
+                    {/* Checkout - allow guests for dine-in */}
+                    <Route path="/checkout" element={<Checkout />} />
+
                     {/* Protected Routes */}
                     <Route
                       path="/settings"
                       element={
                         <ProtectedRoute>
                           <Settings />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/checkout"
-                      element={
-                        <ProtectedRoute allowedRoles={["customer"]}>
-                          <Checkout />
                         </ProtectedRoute>
                       }
                     />

@@ -33,12 +33,29 @@ const orderRoutes = require("./routes/orderRoutes");
 const tableRoutes = require("./routes/tableRoutes");
 const inventoryRoutes = require("./routes/inventoryRoutes");
 
+// Role-specific routes
+const waiterRoutes = require("./routes/waiterRoutes");
+const customerRoutes = require("./routes/customerRoutes");
+const chefRoutes = require("./routes/chefRoutes");
+const cashierRoutes = require("./routes/cashierRoutes");
+const managerRoutes = require("./routes/managerRoutes");
+const ownerRoutes = require("./routes/ownerRoutes");
+
+// Core routes
 app.use("/api/auth", authRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/menu", menuRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/tables", tableRoutes);
 app.use("/api/inventory", inventoryRoutes);
+
+// Role-specific routes
+app.use("/api/waiter", waiterRoutes);
+app.use("/api/customer", customerRoutes);
+app.use("/api/chef", chefRoutes);
+app.use("/api/cashier", cashierRoutes);
+app.use("/api/manager", managerRoutes);
+app.use("/api/owner", ownerRoutes);
 
 app.get("/", (req: any, res: any) => {
   res.send("Restaurant Ordering System API is running...");

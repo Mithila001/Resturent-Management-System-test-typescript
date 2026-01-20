@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import API_URL from "../config/api";
 import { type CheckoutFormData, type CartItem } from "../interfaces/types";
+import { guestOrderAPI } from "../api/customerAPI";
 import "./Checkout.css";
 
 interface CartContextType {
@@ -18,20 +19,36 @@ const Checkout = () => {
   const { user } = useAuth();
   const { cartItems, getCartTotal, clearCart } = useCart() as CartContextType;
 
-  const [formData, setFormData] = useState<CheckoutFormData>({
-    orderType: "delivery",
-    tableNumber: "",
-    street: "",
-    city: "",
-    postalCode: "",
-    phone: "",
-    notes: "",
-    orderNotes: "",
-    paymentMethod: "cash",
+  // Initialize form with saved data if available
+  const [formData, setFormData] = useState<CheckoutFormData>(() => {
+    const savedFormData = localStorage.getItem("checkoutFormData");
+    if (savedFormData) {
+      try {
+        return JSON.parse(savedFormData);
+      } catch (error) {
+        console.error("Error loading saved form data:", error);
+      }
+    }
+    return {
+      orderType: "delivery",
+      tableNumber: "",
+      street: "",
+      city: "",
+      postalCode: "",
+      phone: "",
+      notes: "",
+      orderNotes: "",
+      paymentMethod: "cash",
+    };
   });
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+
+  // Save form data to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("checkoutFormData", JSON.stringify(formData));
+  }, [formData]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
@@ -48,7 +65,15 @@ const Checkout = () => {
     setError("");
 
     try {
-      const token = localStorage.getItem("token");
+      // Check if delivery requires authentication
+      if (formData.orderType === "delivery" && !user) {
+        setError("Please login to place a delivery order");
+        setLoading(false);
+        // Save form data before redirecting (already saved by useEffect, but ensure it's there)
+        localStorage.setItem("checkoutFormData", JSON.stringify(formData));
+        navigate("/login", { state: { from: "/checkout" } });
+        return;
+      }
 
       // Prepare order data
       const orderData: any = {
@@ -61,9 +86,25 @@ const Checkout = () => {
         paymentMethod: formData.paymentMethod,
       };
 
+      let response;
+
       if (formData.orderType === "dine-in") {
         orderData.tableNumber = parseInt(formData.tableNumber);
+
+        // Guest dine-in order (no authentication)
+        if (!user) {
+          response = await guestOrderAPI.createGuestOrder(orderData);
+        } else {
+          // Authenticated dine-in order
+          const token = localStorage.getItem("token");
+          response = await axios.post(`${API_URL}/orders`, orderData, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+        }
       } else {
+        // Delivery order (requires authentication)
         orderData.deliveryAddress = {
           street: formData.street,
           city: formData.city,
@@ -71,18 +112,39 @@ const Checkout = () => {
           phone: formData.phone,
           notes: formData.notes,
         };
+
+        const token = localStorage.getItem("token");
+        response = await axios.post(`${API_URL}/orders`, orderData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
       }
 
-      const response = await axios.post(`${API_URL}/orders`, orderData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      // Clear cart and redirect to order tracking
+      // Clear cart and form data, then redirect to order tracking
       clearCart();
-      alert(`Order placed successfully! Order Number: ${response.data.orderNumber}`);
-      navigate(`/orders/${response.data._id}`);
+      localStorage.removeItem("checkoutFormData"); // Clear saved form data after successful order
+      const orderNumber = response.data.orderNumber;
+      const orderId = response.data._id;
+
+      if (!user && formData.orderType === "dine-in") {
+        // Store guest order with 3-hour expiry
+        const guestOrderData = {
+          orderId,
+          orderNumber,
+          timestamp: Date.now(),
+          expiresAt: Date.now() + 3 * 60 * 60 * 1000, // 3 hours
+        };
+        localStorage.setItem("guestOrder", JSON.stringify(guestOrderData));
+
+        alert(
+          `Order placed successfully!\n\nOrder Number: ${orderNumber}\n\nPlease note your order number. You can track your order at:\n/orders/guest/${orderId}`,
+        );
+        navigate(`/orders/guest/${orderId}`);
+      } else {
+        alert(`Order placed successfully! Order Number: ${orderNumber}`);
+        navigate(`/orders/${orderId}`);
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to place order");
       console.error("Order error:", err);
@@ -90,11 +152,6 @@ const Checkout = () => {
       setLoading(false);
     }
   };
-
-  if (!user) {
-    navigate("/login");
-    return null;
-  }
 
   if (cartItems.length === 0) {
     return (
@@ -110,6 +167,29 @@ const Checkout = () => {
 
   return (
     <div className="checkout-container">
+      {!user && (
+        <div
+          className="guest-notice"
+          style={{
+            backgroundColor: "#fff3cd",
+            border: "1px solid #ffc107",
+            padding: "1rem",
+            marginBottom: "1rem",
+            borderRadius: "4px",
+          }}
+        >
+          <strong>Guest Checkout:</strong> You can place a dine-in order without logging in. For
+          delivery orders, please{" "}
+          <a href="/login" style={{ color: "#0066cc", textDecoration: "underline" }}>
+            login
+          </a>{" "}
+          or{" "}
+          <a href="/register" style={{ color: "#0066cc", textDecoration: "underline" }}>
+            register
+          </a>
+          .
+        </div>
+      )}
       <h1>Checkout</h1>
 
       <div className="checkout-content">

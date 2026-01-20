@@ -1,4 +1,25 @@
 require("dotenv").config();
+
+// Default to development mode when not explicitly set (safe for local dev).
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = "development";
+}
+
+// Provide a safe development fallback for JWT_SECRET when .env is missing.
+// This ensures tokens signed/verified during local development don't fail
+// due to an unset environment variable. Do NOT use this in production.
+if (!process.env.JWT_SECRET) {
+  console.warn("WARNING: JWT_SECRET not set. Using development fallback JWT_SECRET=dev_secret");
+  process.env.JWT_SECRET = "dev_secret";
+}
+
+// Dev-only: show whether JWT_SECRET is set (masked) to assist debugging
+if (process.env.NODE_ENV === "development") {
+  const masked = process.env.JWT_SECRET
+    ? `${process.env.JWT_SECRET.slice(0, 4)}...${process.env.JWT_SECRET.slice(-4)}`
+    : "(none)";
+  console.log(`DEV: NODE_ENV=${process.env.NODE_ENV}, JWT_SECRET=${masked}`);
+}
 const http = require("http");
 const { Server } = require("socket.io");
 const app = require("./app");

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { useSocket } from "../../context/SocketContext";
-import API_URL from "../../config/api";
+import { chefAPI } from "../../api/chefAPI";
 import type { Socket } from "socket.io-client";
 
 // Medium-level typed Order / OrderItem used by the kitchen display
@@ -39,15 +38,9 @@ const KitchenDisplay: React.FC = () => {
 
   const fetchOrders = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get<{ orders: Order[] }>(`${API_URL}/orders?limit=100`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      // Filter strictly for kitchen relevant statuses
-      const kitchenOrders = (res.data?.orders || []).filter((order) =>
-        ["pending", "confirmed", "preparing"].includes(order.orderStatus),
-      );
+      // Use new chef API for Kitchen Display System
+      const res = await chefAPI.getKitchenOrders();
+      const kitchenOrders = Array.isArray(res.data) ? res.data : [];
 
       setOrders(kitchenOrders);
       setLoading(false);
@@ -62,10 +55,10 @@ const KitchenDisplay: React.FC = () => {
 
     if (socket) {
       socket.on("newOrder", (order: Order) => {
-        // Add new order to list if it matches criteria (usually 'pending')
-        setOrders((prev) => [order, ...prev]);
-        // Also re-fetch to stay in sync
-        fetchOrders();
+        // Only add confirmed orders (backend already filters pending)
+        if (order.orderStatus === "confirmed") {
+          setOrders((prev) => [order, ...prev]);
+        }
       });
 
       socket.on("orderStatusUpdated", () => {
@@ -83,15 +76,43 @@ const KitchenDisplay: React.FC = () => {
 
   const updateStatus = async (id: string, status: Order["orderStatus"]) => {
     try {
-      const token = localStorage.getItem("token");
-      await axios.put(
-        `${API_URL}/orders/${id}/status`,
-        { orderStatus: status },
-        { headers: { Authorization: `Bearer ${token}` } },
+      // Optimistically update UI immediately
+      setOrders((prevOrders) =>
+        prevOrders.map((order) => (order._id === id ? { ...order, orderStatus: status } : order)),
       );
-      // The socket listener will trigger a refresh
+
+      // Use appropriate chef API based on status
+      switch (status) {
+        case "confirmed":
+          await chefAPI.confirmOrder(id);
+          break;
+        case "preparing":
+          await chefAPI.startPreparingOrder(id);
+          break;
+        case "ready":
+          await chefAPI.markOrderAsReady(id);
+          break;
+        default:
+          console.warn("Unsupported status update:", status);
+          return;
+      }
+      // Socket listener will sync with server state
     } catch (err) {
       alert("Failed to update status");
+      // Revert optimistic update on error
+      fetchOrders();
+    }
+  };
+
+  const handleCancelOrder = async (id: string) => {
+    const reason = prompt("Please provide a reason for cancelling this order:");
+    if (!reason) return;
+
+    try {
+      await chefAPI.cancelOrder(id, reason);
+      // The socket listener will trigger a refresh
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Failed to cancel order");
     }
   };
 
@@ -116,11 +137,11 @@ const KitchenDisplay: React.FC = () => {
             className="card order-card"
             style={{
               borderLeft: `5px solid ${
-                order.orderStatus === "pending"
-                  ? "orange"
-                  : order.orderStatus === "confirmed"
-                    ? "blue"
-                    : "green"
+                order.orderStatus === "confirmed"
+                  ? "#2196f3"
+                  : order.orderStatus === "preparing"
+                    ? "#ff9800"
+                    : "#4caf50"
               }`,
             }}
           >
@@ -133,7 +154,7 @@ const KitchenDisplay: React.FC = () => {
             >
               <span style={{ fontWeight: "bold" }}>#{order.orderNumber}</span>
               <span className={`status-badge status-${order.orderStatus}`}>
-                {order.orderStatus}
+                {order.orderStatus === "confirmed" ? "New Order" : order.orderStatus}
               </span>
             </div>
 
@@ -182,37 +203,46 @@ const KitchenDisplay: React.FC = () => {
 
             <div
               style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
+                display: "flex",
+                flexDirection: "column",
                 gap: "0.5rem",
               }}
             >
-              {order.orderStatus === "pending" && (
-                <button
-                  className="btn btn-primary"
-                  onClick={() => updateStatus(order._id, "preparing")}
-                >
-                  Start Preparing
-                </button>
+              {order.orderStatus === "confirmed" && (
+                <>
+                  <button
+                    className="btn btn-primary"
+                    style={{ width: "100%", backgroundColor: "#2196f3" }}
+                    onClick={() => updateStatus(order._id, "preparing")}
+                  >
+                    🍳 Start Preparing
+                  </button>
+                  <button
+                    className="btn"
+                    style={{ width: "100%", backgroundColor: "#f44336", color: "white" }}
+                    onClick={() => handleCancelOrder(order._id)}
+                  >
+                    ✕ Cancel Order
+                  </button>
+                </>
               )}
               {order.orderStatus === "preparing" && (
-                <button
-                  className="btn"
-                  style={{ backgroundColor: "#4caf50", color: "white" }}
-                  onClick={() => updateStatus(order._id, "ready")}
-                >
-                  Mark Ready
-                </button>
-              )}
-
-              {order.orderStatus !== "cancelled" && (
-                <button
-                  className="btn"
-                  style={{ backgroundColor: "#f44336", color: "white" }}
-                  onClick={() => updateStatus(order._id, "cancelled")}
-                >
-                  Cancel
-                </button>
+                <>
+                  <button
+                    className="btn"
+                    style={{ width: "100%", backgroundColor: "#4caf50", color: "white" }}
+                    onClick={() => updateStatus(order._id, "ready")}
+                  >
+                    ✓ Mark Ready
+                  </button>
+                  <button
+                    className="btn"
+                    style={{ width: "100%", backgroundColor: "#f44336", color: "white" }}
+                    onClick={() => handleCancelOrder(order._id)}
+                  >
+                    ✕ Cancel Order
+                  </button>
+                </>
               )}
             </div>
           </div>

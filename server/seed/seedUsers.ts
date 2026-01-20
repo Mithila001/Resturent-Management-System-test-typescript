@@ -1,6 +1,8 @@
-const mongoose = require("mongoose");
-const User = require("../src/models/User.ts").default || require("../src/models/User");
-require("dotenv").config();
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import User from "../src/models/User";
+
+dotenv.config();
 
 const demoUsers = [
   {
@@ -49,21 +51,17 @@ const demoUsers = [
 
 const seedUsers = async () => {
   try {
-    // Connect to MongoDB
-    await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect(process.env.MONGO_URI || "");
     console.log("MongoDB Connected for seeding users...");
 
-    // Clear existing users (optional - comment out to keep existing users)
-    // await User.deleteMany({});
-    // console.log('Existing users cleared');
-
-    // Check and create users
     for (const userData of demoUsers) {
+      // @ts-ignore
       const existingUser = await User.findOne({ email: userData.email });
 
       if (existingUser) {
         console.log(`User ${userData.email} already exists - skipping`);
       } else {
+        // @ts-ignore
         await User.create(userData);
         console.log(`Created user: ${userData.email} (${userData.role})`);
       }

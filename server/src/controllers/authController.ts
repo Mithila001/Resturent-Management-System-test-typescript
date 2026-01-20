@@ -5,7 +5,11 @@ const User = require("../models/User").default || require("../models/User");
 type AuthRequest = Request & { user?: any };
 
 const generateToken = (id: any): string => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
+  const secret = process.env.JWT_SECRET || "dev_secret";
+  if (process.env.NODE_ENV === "development" && !process.env.JWT_SECRET) {
+    console.warn("DEV: Using fallback JWT secret for signing tokens (dev_secret)");
+  }
+  return jwt.sign({ id }, secret, {
     expiresIn: "30d",
   });
 };
@@ -56,12 +60,19 @@ const loginUser = async (req: Request, res: Response) => {
     const user = await User.findOne({ email });
 
     if (user && (await user.matchPassword(password))) {
+      const token = generateToken(user._id);
+
+      // Dev-only: log token for debugging authentication issues
+      if (process.env.NODE_ENV === "development") {
+        console.log(`DEV: Generated token for ${user.email}: ${token}`);
+      }
+
       res.json({
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
-        token: generateToken(user._id),
+        token,
       });
     } else {
       res.status(401).json({ message: "Invalid email or password" });

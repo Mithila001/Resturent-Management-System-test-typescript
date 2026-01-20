@@ -9,11 +9,12 @@
     "dev": "nodemon src/server.ts",
     "test": "jest",
     "lint": "eslint .",
-    "seed:users": "node -r ts-node/register seed/seedUsers.js",
-    "seed:tables": "node -r ts-node/register seed/seedTables.js",
-    "seed:data": "node -r ts-node/register seed/seedData.js",
-    "seed:production": "node -r ts-node/register seed/seedProduction.js",
-    "seed:all": "node -r ts-node/register seed/seedProduction.js"
+    "seed:users": "node -r ts-node/register seed/seedUsers.ts",
+    "seed:tables": "node -r ts-node/register seed/seedTables.ts",
+    "seed:data": "node -r ts-node/register seed/seedData.ts",
+    "seed:production": "node -r ts-node/register seed/seedProduction.ts",
+    "seed:all": "node -r ts-node/register seed/seedProduction.ts",
+    "migrate:isCompleted": "node -r ts-node/register seed/migrateIsCompleted.ts"
   },
   "keywords": [],
   "author": "",
