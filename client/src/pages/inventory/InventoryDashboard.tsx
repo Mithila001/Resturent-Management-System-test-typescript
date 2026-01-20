@@ -181,7 +181,11 @@ const InventoryDashboard: React.FC = () => {
           <tbody>
             {items.map((item) => (
               <tr key={item._id} className="table-row-hover">
-                <td>{item.itemName}</td>
+                <td title={item.itemName.length > 30 ? item.itemName : undefined}>
+                  {item.itemName.length > 30
+                    ? `${item.itemName.substring(0, 30)}...`
+                    : item.itemName}
+                </td>
                 <td>{item.category}</td>
                 <td>
                   <div className="quantity-controls">
@@ -256,14 +260,17 @@ const InventoryDashboard: React.FC = () => {
               <div className="form-group">
                 <label className="form-label">
                   <span className="label-icon">📝</span>
-                  Item Name
+                  Item Name{" "}
+                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>
+                    ({newItem.itemName.length}/50)
+                  </span>
                 </label>
                 <input
                   type="text"
                   required
-                  maxLength={100}
+                  maxLength={50}
                   className="form-input"
-                  placeholder="Enter item name"
+                  placeholder="Enter item name (max 50 characters)"
                   value={newItem.itemName}
                   onChange={(e) => setNewItem({ ...newItem, itemName: e.target.value })}
                 />
@@ -386,14 +393,17 @@ const InventoryDashboard: React.FC = () => {
               <div className="form-group">
                 <label className="form-label">
                   <span className="label-icon">📝</span>
-                  Item Name
+                  Item Name{" "}
+                  <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>
+                    ({editingItem.itemName.length}/50)
+                  </span>
                 </label>
                 <input
                   type="text"
                   required
-                  maxLength={100}
+                  maxLength={50}
                   className="form-input"
-                  placeholder="Enter item name"
+                  placeholder="Enter item name (max 50 characters)"
                   value={editingItem.itemName}
                   onChange={(e) => setEditingItem({ ...editingItem, itemName: e.target.value })}
                 />

@@ -121,11 +121,7 @@
   display: inline-flex;
   align-items: center;
   padding: 0.4rem 1rem;
-  background: linear-gradient(
-    135deg,
-    var(--accent-color),
-    var(--primary-color)
-  );
+  background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
   color: white;
   border-radius: var(--radius-full);
   font-size: 0.875rem;
@@ -160,11 +156,7 @@
   align-items: center;
   gap: 1rem;
   padding: 1.25rem;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 107, 53, 0.1),
-    rgba(255, 107, 53, 0.05)
-  );
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(255, 107, 53, 0.05));
   border: 2px solid var(--border-color);
   border-radius: var(--radius-md);
   transition: all 0.2s ease;
@@ -176,20 +168,12 @@
 }
 
 .stat-card.stat-success {
-  background: linear-gradient(
-    135deg,
-    rgba(0, 184, 148, 0.1),
-    rgba(0, 184, 148, 0.05)
-  );
+  background: linear-gradient(135deg, rgba(0, 184, 148, 0.1), rgba(0, 184, 148, 0.05));
   border-color: var(--accent-color);
 }
 
 .stat-card.stat-warning {
-  background: linear-gradient(
-    135deg,
-    rgba(253, 203, 110, 0.1),
-    rgba(253, 203, 110, 0.05)
-  );
+  background: linear-gradient(135deg, rgba(253, 203, 110, 0.1), rgba(253, 203, 110, 0.05));
   border-color: var(--warning-color);
 }
 
@@ -262,20 +246,12 @@
 
 .table-card.available {
   border-color: var(--accent-color);
-  background: linear-gradient(
-    135deg,
-    rgba(0, 184, 148, 0.05),
-    rgba(0, 184, 148, 0.02)
-  );
+  background: linear-gradient(135deg, rgba(0, 184, 148, 0.05), rgba(0, 184, 148, 0.02));
 }
 
 .table-card.occupied {
   border-color: var(--warning-color);
-  background: linear-gradient(
-    135deg,
-    rgba(253, 203, 110, 0.05),
-    rgba(253, 203, 110, 0.02)
-  );
+  background: linear-gradient(135deg, rgba(253, 203, 110, 0.05), rgba(253, 203, 110, 0.02));
 }
 
 .table-card:hover {
@@ -433,29 +409,17 @@
 }
 
 .order-stat-item.warning {
-  background: linear-gradient(
-    135deg,
-    rgba(253, 203, 110, 0.1),
-    rgba(253, 203, 110, 0.05)
-  );
+  background: linear-gradient(135deg, rgba(253, 203, 110, 0.1), rgba(253, 203, 110, 0.05));
   border-color: var(--warning-color);
 }
 
 .order-stat-item.info {
-  background: linear-gradient(
-    135deg,
-    rgba(116, 185, 255, 0.1),
-    rgba(116, 185, 255, 0.05)
-  );
+  background: linear-gradient(135deg, rgba(116, 185, 255, 0.1), rgba(116, 185, 255, 0.05));
   border-color: var(--info-color);
 }
 
 .order-stat-item.success {
-  background: linear-gradient(
-    135deg,
-    rgba(0, 184, 148, 0.1),
-    rgba(0, 184, 148, 0.05)
-  );
+  background: linear-gradient(135deg, rgba(0, 184, 148, 0.1), rgba(0, 184, 148, 0.05));
   border-color: var(--accent-color);
 }
 
@@ -516,11 +480,7 @@
 }
 
 .modern-table thead {
-  background: linear-gradient(
-    135deg,
-    var(--primary-color),
-    var(--accent-color)
-  );
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
   color: white !important;
 }
 
@@ -540,7 +500,7 @@
 }
 
 .modern-table tbody tr {
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .modern-table tbody tr:hover {
@@ -548,8 +508,9 @@
 }
 
 .table-row-hover:hover {
-  transform: scale(1.01);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.15);
+  background: rgba(255, 107, 53, 0.08) !important;
 }
 
 .order-link {
@@ -1230,11 +1191,7 @@
   left: 0;
   width: 4px;
   height: 100%;
-  background: linear-gradient(
-    180deg,
-    var(--primary-color),
-    var(--accent-color)
-  );
+  background: linear-gradient(180deg, var(--primary-color), var(--accent-color));
   transform: scaleY(0);
   transition: transform 0.3s ease;
 }
@@ -1312,6 +1269,61 @@
    INVENTORY DASHBOARD SPECIFIC STYLES
    ======================================== */
 
+/* Inventory Table Cell Styles */
+.modern-table td:first-child,
+.modern-table td:nth-child(2) {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: relative;
+}
+
+.modern-table td:first-child:hover,
+.modern-table td:nth-child(2):hover {
+  overflow: visible;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Cell content wrapper for tooltips */
+.cell-content {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cell-content[title]:hover {
+  cursor: help;
+}
+
+/* Enhanced Table Row Animation */
+.modern-table tbody tr {
+  animation: slideUp 0.3s ease forwards;
+  opacity: 0;
+}
+
+.modern-table tbody tr:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.modern-table tbody tr:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.modern-table tbody tr:nth-child(3) {
+  animation-delay: 0.15s;
+}
+.modern-table tbody tr:nth-child(4) {
+  animation-delay: 0.2s;
+}
+.modern-table tbody tr:nth-child(5) {
+  animation-delay: 0.25s;
+}
+.modern-table tbody tr:nth-child(n + 6) {
+  animation-delay: 0.3s;
+}
+
 .quantity-controls {
   display: flex;
   align-items: center;
@@ -1362,7 +1374,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1376,8 +1389,53 @@
   border-radius: var(--radius-lg);
   width: 90%;
   max-width: 500px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: slideInDown 0.3s ease;
+}
+
+/* Modern Modal Styles */
+.modern-modal {
+  background: var(--surface-color);
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideInDown 0.3s ease;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+  background: var(--error-color);
+  color: white;
+  transform: rotate(90deg);
+}
+
+.modal-icon {
+  font-size: 1.5rem;
 }
 
 .modal-title {
@@ -1405,6 +1463,21 @@
 .modal-actions .btn {
   flex: 1;
   justify-content: center;
+}
+
+/* Form Input Focus States */
+.form-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+.form-input:invalid:not(:focus):not(:placeholder-shown) {
+  border-color: var(--error-color);
+}
+
+.form-input:valid:not(:focus):not(:placeholder-shown) {
+  border-color: var(--accent-color);
 }
 
 .btn-secondary {
@@ -1446,5 +1519,40 @@
   .filter-btn,
   .filter-tab {
     width: 100%;
+  }
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
