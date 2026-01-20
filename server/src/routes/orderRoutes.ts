@@ -22,7 +22,7 @@ router.get("/stats", authorize("admin", "manager", "owner"), getOrderStats);
 router.get(
   "/by-table/:tableNumber",
   authorize("waiter", "cashier", "admin", "manager", "owner"),
-  getOrdersByTable
+  getOrdersByTable,
 );
 
 // Create new order (customers only) and get all orders
@@ -35,14 +35,10 @@ router.route("/:id").get(getOrderById).delete(cancelOrder);
 router.put(
   "/:id/status",
   authorize("admin", "manager", "owner", "chef", "waiter", "cashier"),
-  updateOrderStatus
+  updateOrderStatus,
 );
 
 // Update payment status (cashier, admin, manager, owner)
-router.put(
-  "/:id/payment",
-  authorize("admin", "manager", "owner", "cashier"),
-  updatePaymentStatus
-);
+router.put("/:id/payment", authorize("admin", "manager", "owner", "cashier"), updatePaymentStatus);
 
 module.exports = router;
