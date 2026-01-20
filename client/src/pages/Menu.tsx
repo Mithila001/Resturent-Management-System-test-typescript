@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 import API_URL from "../config/api";
 
 interface Category {
@@ -31,6 +32,12 @@ const Menu: React.FC = () => {
   const { addToCart } = useCart() as unknown as {
     addToCart: (item: MenuItem, qty?: number) => void;
   };
+
+  // Get user to check role
+  const { user } = useAuth();
+
+  // Only show cart functionality for guests (non-logged in) and logged in customers
+  const shouldShowCart = !user || user.role === "customer";
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -265,13 +272,15 @@ const Menu: React.FC = () => {
                   >
                     ${item.price.toFixed(2)}
                   </span>
-                  <button
-                    onClick={(e) => handleAddToCart(item, e)}
-                    className="btn btn-primary"
-                    style={{ padding: "0.5rem 1rem", width: "100%" }}
-                  >
-                    Add to Cart
-                  </button>
+                  {shouldShowCart && (
+                    <button
+                      onClick={(e) => handleAddToCart(item, e)}
+                      className="btn btn-primary"
+                      style={{ padding: "0.5rem 1rem", width: "100%" }}
+                    >
+                      Add to Cart
+                    </button>
+                  )}
                 </div>
               </div>
             ))

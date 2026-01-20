@@ -15,7 +15,7 @@ type CartItem = {
 
 const Cart: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth() as { user: { name?: string } | null };
+  const { user } = useAuth() as { user: { name?: string; role?: string } | null };
   const {
     cartItems,
     removeFromCart,
@@ -33,6 +33,13 @@ const Cart: React.FC = () => {
   };
 
   const [isOpen, setIsOpen] = useState(false);
+
+  // Only show cart for guests (non-logged in) and logged in customers
+  const shouldShowCart = !user || user.role === "customer";
+
+  if (!shouldShowCart) {
+    return null;
+  }
 
   const handleCheckout = () => {
     // Allow guests to proceed to checkout for dine-in orders

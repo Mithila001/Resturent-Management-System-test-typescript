@@ -64,13 +64,7 @@ const Navigation = () => {
         {/* Navigation Links */}
         <div className={`nav-links ${isMenuOpen ? "mobile-open" : ""}`}>
           <div className="nav-main-links">
-            <Link to="/" className="nav-link" onClick={() => setIsMenuOpen(false)}>
-              <span className="nav-icon">🏠</span> Home
-            </Link>
-            <Link to="/menu" className="nav-link" onClick={() => setIsMenuOpen(false)}>
-              <span className="nav-icon">📋</span> Menu
-            </Link>
-            {user && (
+            {user && user.role === "customer" && (
               <Link to="/orders" className="nav-link" onClick={() => setIsMenuOpen(false)}>
                 <span className="nav-icon">📦</span> My Orders
               </Link>

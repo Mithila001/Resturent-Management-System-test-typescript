@@ -44,15 +44,26 @@ const addInventoryItem = async (req: Request, res: Response) => {
 // @access  Private (Manager, Owner, Admin, Chef - for usage)
 const updateInventoryItem = async (req: Request, res: Response) => {
   try {
-    const { quantity, lowStockThreshold } = req.body;
+    const { itemName, quantity, unit, lowStockThreshold, category } = req.body;
     const item = await Inventory.findById(req.params.id);
 
     if (!item) {
       return res.status(404).json({ message: "Item not found" });
     }
 
+    // Check for duplicate item name when updating
+    if (itemName && itemName !== item.itemName) {
+      const existingItem = await Inventory.findOne({ itemName });
+      if (existingItem) {
+        return res.status(400).json({ message: "Item with this name already exists" });
+      }
+      item.itemName = itemName;
+    }
+
     if (quantity !== undefined) item.quantity = quantity;
+    if (unit !== undefined) item.unit = unit;
     if (lowStockThreshold !== undefined) item.lowStockThreshold = lowStockThreshold;
+    if (category !== undefined) item.category = category;
 
     item.lastUpdated = new Date();
     await item.save();
