@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import API_URL from "../../config/api";
+import { useAuth } from "../../context/AuthContext";
 
 // Medium-level types for Inventory
 type Unit = "kg" | "g" | "l" | "ml" | "pcs" | "packs";
@@ -40,6 +41,12 @@ const InventoryDashboard: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
+  const { user } = useAuth();
+
+  // Check if user has edit permissions (Manager or Admin)
+  const canEdit = user?.role === "manager" || user?.role === "admin";
+
   const [newItem, setNewItem] = useState<InventoryForm>({
     itemName: "",
     quantity: 0,
@@ -152,18 +159,46 @@ const InventoryDashboard: React.FC = () => {
     );
 
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-container" data-mode={isEditMode ? "edit" : "view-only"}>
       <div className="dashboard-header">
         <div className="header-content">
           <h1 className="dashboard-title">
             <span className="title-icon">📦</span>
             Inventory Management
+            {!canEdit && (
+              <span
+                style={{
+                  fontSize: "0.75rem",
+                  fontWeight: "normal",
+                  color: "var(--text-secondary)",
+                  marginLeft: "0.75rem",
+                }}
+              >
+                (View Only)
+              </span>
+            )}
           </h1>
           <p className="dashboard-subtitle">Track and manage restaurant inventory items</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
-          <span>➕</span> Add New Item
-        </button>
+        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+          {canEdit && (
+            <div className="mode-toggle-container">
+              <button
+                className={`mode-toggle-btn ${isEditMode ? "active" : ""}`}
+                onClick={() => setIsEditMode(!isEditMode)}
+                title={isEditMode ? "Switch to View Only Mode" : "Switch to Edit Mode"}
+              >
+                <span>{isEditMode ? "🔓" : "🔒"}</span>
+                {isEditMode ? "Edit Mode" : "View Only"}
+              </button>
+            </div>
+          )}
+          {canEdit && isEditMode && (
+            <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
+              <span>➕</span> Add New Item
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="modern-table-container">
@@ -175,7 +210,7 @@ const InventoryDashboard: React.FC = () => {
               <th>Quantity</th>
               <th>Unit</th>
               <th>Status</th>
-              <th>Actions</th>
+              {canEdit && isEditMode && <th>Actions</th>}
             </tr>
           </thead>
           <tbody>
@@ -188,21 +223,27 @@ const InventoryDashboard: React.FC = () => {
                 </td>
                 <td>{item.category}</td>
                 <td>
-                  <div className="quantity-controls">
-                    <button
-                      className="quantity-btn"
-                      onClick={() => handleUpdateQuantity(item._id, Math.max(0, item.quantity - 1))}
-                    >
-                      -
-                    </button>
+                  {canEdit && isEditMode ? (
+                    <div className="quantity-controls">
+                      <button
+                        className="quantity-btn"
+                        onClick={() =>
+                          handleUpdateQuantity(item._id, Math.max(0, item.quantity - 1))
+                        }
+                      >
+                        -
+                      </button>
+                      <span className="quantity-value">{item.quantity}</span>
+                      <button
+                        className="quantity-btn"
+                        onClick={() => handleUpdateQuantity(item._id, item.quantity + 1)}
+                      >
+                        +
+                      </button>
+                    </div>
+                  ) : (
                     <span className="quantity-value">{item.quantity}</span>
-                    <button
-                      className="quantity-btn"
-                      onClick={() => handleUpdateQuantity(item._id, item.quantity + 1)}
-                    >
-                      +
-                    </button>
-                  </div>
+                  )}
                 </td>
                 <td>{item.unit}</td>
                 <td>
@@ -218,24 +259,26 @@ const InventoryDashboard: React.FC = () => {
                     </span>
                   )}
                 </td>
-                <td>
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <button
-                      onClick={() => handleEditItem(item)}
-                      className="action-btn edit-btn"
-                      title="Edit item"
-                    >
-                      <span>✏️</span> Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(item._id)}
-                      className="action-btn delete-btn"
-                      title="Delete item"
-                    >
-                      <span>🗑️</span> Delete
-                    </button>
-                  </div>
-                </td>
+                {canEdit && isEditMode && (
+                  <td>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <button
+                        onClick={() => handleEditItem(item)}
+                        className="action-btn edit-btn"
+                        title="Edit item"
+                      >
+                        <span>✏️</span> Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(item._id)}
+                        className="action-btn delete-btn"
+                        title="Delete item"
+                      >
+                        <span>🗑️</span> Delete
+                      </button>
+                    </div>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

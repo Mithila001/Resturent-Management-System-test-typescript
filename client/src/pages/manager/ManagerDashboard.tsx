@@ -111,22 +111,6 @@ const ManagerDashboard = () => {
             <div className="quick-link-arrow">→</div>
           </Link>
 
-          <Link to="/admin" className="quick-link-card">
-            <div
-              className="quick-link-icon"
-              style={{
-                background: "linear-gradient(135deg, #e74c3c, #c0392b)",
-              }}
-            >
-              ⚙️
-            </div>
-            <div className="quick-link-content">
-              <h3>Menu & Users</h3>
-              <p>Manage menu items and staff accounts</p>
-            </div>
-            <div className="quick-link-arrow">→</div>
-          </Link>
-
           <Link to="/orders" className="quick-link-card">
             <div
               className="quick-link-icon"

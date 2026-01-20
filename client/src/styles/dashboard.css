@@ -1556,3 +1556,62 @@
     transform: translateY(0);
   }
 }
+/* ========================================
+   INVENTORY MODE TOGGLE STYLES
+   ======================================== */
+
+.mode-toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mode-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.65rem 1.25rem;
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mode-toggle-btn:hover {
+  background: var(--surface-hover);
+  border-color: var(--primary-color);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.mode-toggle-btn.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+}
+
+.mode-toggle-btn.active:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.mode-toggle-btn span {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+/* View Only Mode Indicator */
+.dashboard-container[data-mode="view-only"] .modern-table {
+  opacity: 0.95;
+}
+
+.dashboard-container[data-mode="view-only"] .quantity-value {
+  color: var(--text-secondary);
+  font-weight: 500;
+}

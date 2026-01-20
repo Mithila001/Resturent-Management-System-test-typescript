@@ -47,7 +47,7 @@ const Home = () => {
                   Welcome back, <strong>{user.name}</strong>!
                 </p>
                 <div className="button-group">
-                  {user.role !== "admin" && (
+                  {user.role === "customer" && (
                     <Link to="/orders" className="btn">
                       My Orders
                     </Link>
