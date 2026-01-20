@@ -196,6 +196,7 @@ const createOrder = async (req: AuthRequest, res: Response) => {
       estimatedDeliveryTime,
       orderType: orderType || "delivery",
       tableNumber: orderType === "dine-in" ? tableNumber : undefined,
+      orderStatus: orderType === "delivery" ? "confirmed" : "pending", // Auto-confirm delivery orders
     });
 
     // Populate order details
