@@ -17,7 +17,7 @@ const POS: React.FC = () => {
       clearCart: () => void;
       getCartTotal: () => number;
     };
-  const [orderType, setOrderType] = useState<string>("dine-in");
+  const [orderType, setOrderType] = useState<"dine-in" | "delivery" | "takeaway">("dine-in");
   const [tableNumber, setTableNumber] = useState<string>("");
 
   useEffect(() => {
@@ -26,7 +26,7 @@ const POS: React.FC = () => {
         // Use customer API for public menu browsing
         const [catRes, menuRes] = await Promise.all([
           customerAPI.getCategories(),
-          customerAPI.browseMenu({ isAvailable: true }),
+          customerAPI.browseMenu(),
         ]);
         setCategories(catRes.data || []);
         setMenuItems(menuRes.data || []);
@@ -43,9 +43,9 @@ const POS: React.FC = () => {
     selectedCategory === "all"
       ? menuItems
       : menuItems.filter((item) => {
-          const catId = typeof item.category === "object" ? item.category._id : item.category;
-          return catId === selectedCategory;
-        });
+        const catId = item.category && typeof item.category === "object" ? item.category._id : item.category;
+        return catId === selectedCategory;
+      });
 
   const handlePlaceOrder = async () => {
     if (cartItems.length === 0) return alert("Cart is empty");
@@ -63,11 +63,11 @@ const POS: React.FC = () => {
         deliveryAddress:
           orderType === "delivery"
             ? {
-                street: "Walk-in",
-                city: "Store",
-                postalCode: "00000",
-                phone: "0000000000",
-              }
+              street: "Walk-in",
+              city: "Store",
+              postalCode: "00000",
+              phone: "0000000000",
+            }
             : undefined,
         orderNotes: "Placed via POS",
       };

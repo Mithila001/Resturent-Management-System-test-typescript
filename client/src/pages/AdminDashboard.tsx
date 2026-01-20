@@ -237,7 +237,7 @@ const AdminDashboard = () => {
       name: item.name,
       description: item.description,
       price: item.price.toString(),
-      category: typeof item.category === "object" ? item.category._id : item.category,
+      category: item.category && typeof item.category === "object" ? item.category._id : item.category,
       imageUrl: item.imageUrl || "",
       isAvailable: item.isAvailable,
       isVegetarian: item.isVegetarian,
@@ -579,7 +579,7 @@ const AdminDashboard = () => {
                     <tr key={item._id} style={{ borderBottom: "1px solid var(--border-color)" }}>
                       <td style={{ padding: "1rem" }}>{item.name}</td>
                       <td style={{ padding: "1rem" }}>
-                        {typeof item.category === "object" ? item.category.name : "N/A"}
+                        {item.category && typeof item.category === "object" ? item.category.name : "N/A"}
                       </td>
                       <td style={{ padding: "1rem" }}>${item.price.toFixed(2)}</td>
                       <td style={{ padding: "1rem" }}>
