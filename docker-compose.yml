@@ -1,86 +1,65 @@
-# Multi-stage Docker Compose configuration for Restaurant Management System
-version: '3.8'
+version: "3.8"
 
 services:
   # MongoDB Database
   mongodb:
-    image: mongo:latest
-    container_name: rms-mongodb
+    image: mongo:7
+    container_name: restaurant_mongodb
     restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-password123}
-      MONGO_INITDB_DATABASE: ${MONGO_DB_NAME:-restaurant_db}
     ports:
-      - "${MONGO_PORT:-27017}:27017"
+      - "27017:27017"
     volumes:
       - mongodb_data:/data/db
-      - mongodb_config:/data/configdb
+    environment:
+      - MONGO_INITDB_DATABASE=restaurant_db
     networks:
-      - rms-network
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - restaurant-network
 
   # Backend Server
   server:
     build:
       context: ./server
       dockerfile: Dockerfile
-      target: production
-    container_name: rms-server
+    container_name: restaurant_server
     restart: unless-stopped
-    depends_on:
-      mongodb:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 5000
-      MONGO_URI: mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-password123}@mongodb:27017/${MONGO_DB_NAME:-restaurant_db}?authSource=admin
-      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-this-in-production}
-      JWT_EXPIRE: ${JWT_EXPIRE:-30d}
     ports:
-      - "${SERVER_PORT:-5000}:5000"
+      - "5000:5000"
+    env_file:
+      - .env.docker
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - MONGO_URI=mongodb://mongodb:27017/restaurant_db
+    depends_on:
+      - mongodb
     volumes:
-      - ./server/public:/app/public
+      # Persistent storage for uploaded images
+      - ./server/public/images:/app/public/images
     networks:
-      - rms-network
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
-      interval: 30s
-      timeout: 3s
-      retries: 3
+      - restaurant-network
 
   # Frontend Client
   client:
     build:
       context: ./client
       dockerfile: Dockerfile
-      target: production
       args:
-        VITE_API_URL: ${VITE_API_URL:-http://localhost:5000/api}
-    container_name: rms-client
+        - VITE_API_URL=/api
+    container_name: restaurant_client
     restart: unless-stopped
+    ports:
+      - "80:80"
     depends_on:
       - server
-    ports:
-      - "${CLIENT_PORT:-3000}:80"
     networks:
-      - rms-network
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
-      interval: 30s
-      timeout: 3s
-      retries: 3
+      - restaurant-network
 
-networks:
-  rms-network:
-    driver: bridge
-
+# Named volumes
 volumes:
   mongodb_data:
     driver: local
-  mongodb_config:
-    driver: local
+
+# Custom network
+networks:
+  restaurant-network:
+    driver: bridge

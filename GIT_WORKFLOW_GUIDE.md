@@ -1,6 +1,8 @@
-# 🔄 Complete Migration & Git Workflow Guide
+# 🔄 Complete Step-by-Step Project Construction Guide
 
-This guide provides step-by-step instructions for **EVERY** team member to migrate their specific features from the old code to the new repository.
+This guide provides the exact "recipe" to build the Restaurant Management System from scratch. It is divided into **10 Phases**, where each team member has specific tasks.
+
+**IMPORTANT**: ALWAYS start by pulling the latest changes!
 
 ---
 
@@ -41,7 +43,7 @@ This guide provides step-by-step instructions for **EVERY** team member to migra
 
 **Goal**: Setup automated testing and deployment pipelines.
 
-1.  **Update & Branch**:
+1.  **Create Branch**:
     ```bash
     git checkout main
     git pull origin main
@@ -68,7 +70,7 @@ This guide provides step-by-step instructions for **EVERY** team member to migra
 
 **Goal**: Implement Login, Registration, and User Management.
 
-1.  **Update & Branch**:
+1.  **Create Branch**:
     ```bash
     git checkout main
     git pull origin main
@@ -77,17 +79,13 @@ This guide provides step-by-step instructions for **EVERY** team member to migra
 
 2.  **Action: Backend Migration**:
     -   **CREATE**: `server/src/controllers/authController.ts`
-    -   **COPY CODE**: Copy code from source `server/src/controllers/authController.ts` to this new file.
     -   **CREATE**: `server/src/routes/authRoutes.ts`
-    -   **COPY CODE**: Copy code from source `server/src/routes/authRoutes.ts`.
+    -   *Copy relevant code from source*.
 
 3.  **Action: Frontend Migration**:
     -   **CREATE**: `client/src/pages/Login.tsx`
-    -   **COPY CODE**: Copy code from source `client/src/pages/Login.tsx`.
     -   **CREATE**: `client/src/pages/Register.tsx`
-    -   **COPY CODE**: Copy code from source `client/src/pages/Register.tsx`.
     -   **CREATE**: `client/src/pages/Settings.tsx`
-    -   **COPY CODE**: Copy code from source `client/src/pages/Settings.tsx`.
 
 4.  **Commit & Push**:
     ```bash
@@ -96,7 +94,7 @@ This guide provides step-by-step instructions for **EVERY** team member to migra
     git push origin feat/sadew-auth-system
     ```
 
-5.  **Merge**: Create PR -> Merge to `main`.
+5.  **Merge**: Create PR -> Merge to `main` (or `develop` if setup).
 
 ---
 
@@ -104,7 +102,7 @@ This guide provides step-by-step instructions for **EVERY** team member to migra
 
 **Goal**: Menu browsing and customer order placement.
 
-1.  **Update & Branch**:
+1.  **Create Branch**:
     ```bash
     git checkout main
     git pull origin main
@@ -113,15 +111,11 @@ This guide provides step-by-step instructions for **EVERY** team member to migra
 
 2.  **Action: Backend Migration**:
     -   **CREATE**: `server/src/controllers/customerController.ts`
-    -   **COPY CODE**: From source `customerController.ts`.
     -   **CREATE**: `server/src/controllers/menuController.ts`
-    -   **COPY CODE**: From source `menuController.ts`.
 
 3.  **Action: Frontend Migration**:
-    -   **CREATE**: `client/src/pages/Menu.tsx`
-    -   **COPY CODE**: Copy code from source `client/src/pages/Menu.tsx`.
-    -   **CREATE**: `client/src/pages/OrderTracking.tsx`
-    -   **COPY CODE**: Copy code from source `client/src/pages/OrderTracking.tsx`.
+    -   **CREATE**: `client/src/pages/customer/Menu.tsx`
+    -   **CREATE**: `client/src/pages/customer/OrderTracking.tsx`
 
 4.  **Commit & Push**:
     ```bash
@@ -134,11 +128,11 @@ This guide provides step-by-step instructions for **EVERY** team member to migra
 
 ---
 
-## �️ Phase 5: Waiter System (Danidu)
+## 🤵 Phase 5: Waiter System (Danidu)
 
 **Goal**: Table allocation and order delivery.
 
-1.  **Update & Branch**:
+1.  **Create Branch**:
     ```bash
     git checkout main
     git pull origin main
@@ -147,13 +141,11 @@ This guide provides step-by-step instructions for **EVERY** team member to migra
 
 2.  **Action: Backend Migration**:
     -   **CREATE**: `server/src/controllers/orderController.ts`
-    -   **COPY CODE**: From source `orderController.ts`.
     -   **CREATE**: `server/src/controllers/tableController.ts`
-    -   **COPY CODE**: From source `tableController.ts`.
 
 3.  **Action: Frontend Migration**:
     -   **CREATE**: `client/src/pages/waiter/WaiterDashboard.tsx`
-    -   **COPY CODE**: Copy code from source `client/src/pages/waiter/WaiterDashboard.tsx`.
+    -   **CREATE**: `client/src/pages/waiter/TableAllocation.tsx`
 
 4.  **Commit & Push**:
     ```bash
@@ -166,11 +158,11 @@ This guide provides step-by-step instructions for **EVERY** team member to migra
 
 ---
 
-## 👨‍� Phase 6: Chef Dashboard (Sithila)
+## 👨‍🍳 Phase 6: Chef Dashboard (Sithila)
 
 **Goal**: Kitchen display system.
 
-1.  **Update & Branch**:
+1.  **Create Branch**:
     ```bash
     git checkout main
     git pull origin main
@@ -179,13 +171,10 @@ This guide provides step-by-step instructions for **EVERY** team member to migra
 
 2.  **Action: Backend Migration**:
     -   **CREATE**: `server/src/controllers/chefController.ts`
-    -   **COPY CODE**: From source `chefController.ts`.
     -   **CREATE**: `server/src/routes/chefRoutes.ts`
-    -   **COPY CODE**: From source `chefRoutes.ts`.
 
 3.  **Action: Frontend Migration**:
     -   **CREATE**: `client/src/pages/kitchen/ChefDashboard.tsx`
-    -   **COPY CODE**: Copy code from source `client/src/pages/kitchen/ChefDashboard.tsx`.
 
 4.  **Commit & Push**:
     ```bash
@@ -202,7 +191,7 @@ This guide provides step-by-step instructions for **EVERY** team member to migra
 
 **Goal**: Point of Sale system.
 
-1.  **Update & Branch**:
+1.  **Create Branch**:
     ```bash
     git checkout main
     git pull origin main
@@ -211,13 +200,10 @@ This guide provides step-by-step instructions for **EVERY** team member to migra
 
 2.  **Action: Backend Migration**:
     -   **CREATE**: `server/src/controllers/cashierController.ts`
-    -   **COPY CODE**: From source `cashierController.ts`.
 
 3.  **Action: Frontend Migration**:
     -   **CREATE**: `client/src/pages/cashier/CashierDashboard.tsx`
-    -   **COPY CODE**: Copy from `client/src/pages/cashier/CashierDashboard.tsx`.
     -   **CREATE**: `client/src/pages/cashier/POS.tsx`
-    -   **COPY CODE**: Copy from `client/src/pages/cashier/POS.tsx`.
 
 4.  **Commit & Push**:
     ```bash
@@ -234,7 +220,7 @@ This guide provides step-by-step instructions for **EVERY** team member to migra
 
 **Goal**: Inventory management.
 
-1.  **Update & Branch**:
+1.  **Create Branch**:
     ```bash
     git checkout main
     git pull origin main
@@ -243,13 +229,10 @@ This guide provides step-by-step instructions for **EVERY** team member to migra
 
 2.  **Action: Backend Migration**:
     -   **CREATE**: `server/src/controllers/inventoryController.ts`
-    -   **COPY CODE**: From source `inventoryController.ts`.
     -   **CREATE**: `server/src/models/Inventory.ts`
-    -   **COPY CODE**: From source `models/Inventory.ts`.
 
 3.  **Action: Frontend Migration**:
     -   **CREATE**: `client/src/pages/inventory/InventoryDashboard.tsx`
-    -   **COPY CODE**: Copy from `client/src/pages/inventory/InventoryDashboard.tsx`.
 
 4.  **Commit & Push**:
     ```bash
@@ -262,41 +245,42 @@ This guide provides step-by-step instructions for **EVERY** team member to migra
 
 ---
 
-## 📊 Phase 9: Manager Dashboard (Eshini)
+## 💼 Phase 9: Owner & Manager Dashboard (Eshini)
 
-**Goal**: Analytics and reports.
+**Goal**: Business Overview, Analytics, and Reports.
 
-1.  **Update & Branch**:
+1.  **Create Branch**:
     ```bash
     git checkout main
     git pull origin main
-    git checkout -b feat/eshini-manager-dashboard
+    git checkout -b feat/eshini-owner-manager-dashboard
     ```
 
 2.  **Action: Backend Migration**:
-    -   **CREATE**: `server/src/controllers/managerController.ts`
-    -   **COPY CODE**: From source `managerController.ts`.
+    -   **CREATE**: `server/src/controllers/managerController.ts` (Reports/Analytics)
+    -   **CREATE**: `server/src/controllers/ownerController.ts` (Revenue/Settings)
 
 3.  **Action: Frontend Migration**:
     -   **CREATE**: `client/src/pages/manager/ManagerDashboard.tsx`
-    -   **COPY CODE**: Copy from `client/src/pages/manager/ManagerDashboard.tsx`.
+    -   **CREATE**: `client/src/pages/owner/OwnerDashboard.tsx`
+    -   *Connect charts and metric cards*.
 
 4.  **Commit & Push**:
     ```bash
     git add .
-    git commit -m "feat(eshini): implement manager dashboard"
-    git push origin feat/eshini-manager-dashboard
+    git commit -m "feat(eshini): implement owner and manager dashboards"
+    git push origin feat/eshini-owner-manager-dashboard
     ```
 
 5.  **Merge**: Create PR -> Merge to `main`.
 
 ---
 
-## � Phase 10: Owner/Admin Dashboard (Nadeesha)
+## 🛡️ Phase 10: System Admin Dashboard (Nadeesha)
 
-**Goal**: System Admin control.
+**Goal**: User Management and System Administration.
 
-1.  **Update & Branch**:
+1.  **Create Branch**:
     ```bash
     git checkout main
     git pull origin main
@@ -304,19 +288,16 @@ This guide provides step-by-step instructions for **EVERY** team member to migra
     ```
 
 2.  **Action: Backend Migration**:
-    -   **CREATE**: `server/src/controllers/ownerController.ts`
-    -   **COPY CODE**: From source `ownerController.ts`.
+    -   **CREATE**: `server/src/controllers/adminController.ts`
 
 3.  **Action: Frontend Migration**:
-    -   **CREATE**: `client/src/pages/admin/OwnerDashboard.tsx`
-    -   **COPY CODE**: Copy from `client/src/pages/admin/OwnerDashboard.tsx`.
-    -   **CREATE**: `client/src/pages/AdminDashboard.tsx`
-    -   **COPY CODE**: Copy from `client/src/pages/AdminDashboard.tsx`.
+    -   **CREATE**: `client/src/pages/admin/AdminDashboard.tsx`
+    -   *Implement User Role Management and System Logs*.
 
 4.  **Commit & Push**:
     ```bash
     git add .
-    git commit -m "feat(nadeesha): implement owner and detailed admin dashboard"
+    git commit -m "feat(nadeesha): implement system admin panel"
     git push origin feat/nadeesha-admin-panel
     ```
 
@@ -324,18 +305,4 @@ This guide provides step-by-step instructions for **EVERY** team member to migra
 
 ---
 
-## ⚠️ Important Notes for All Members
-
--   **Before Creating Files**: Always make sure you are inside the correct folder (`server/src/...` or `client/src/...`).
--   **Dependencies**: If your code uses a new npm package, run `npm install package-name` and include `package.json` updates in your commit.
--   **Conflicts**: If you cannot merge because of conflicts, run:
-    ```bash
-    git checkout main
-    git pull
-    git checkout your-branch
-    git merge main
-    # Fix conflicts in code editor
-    git add .
-    git commit -m "fix: resolve merge conflicts"
-    git push
-    ```
+**Last Updated**: 2026-01-20
