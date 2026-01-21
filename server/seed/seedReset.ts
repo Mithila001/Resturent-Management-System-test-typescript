@@ -392,6 +392,68 @@ const tables = [
   { tableNumber: 10, capacity: 4, status: "available" },
 ];
 
+const inventoryItems = [
+  // Meat
+  { itemName: "Chicken Breast", quantity: 50, unit: "kg", lowStockThreshold: 10, category: "Meat" },
+  { itemName: "Ground Beef", quantity: 40, unit: "kg", lowStockThreshold: 8, category: "Meat" },
+  { itemName: "Pork Ribs", quantity: 30, unit: "kg", lowStockThreshold: 5, category: "Meat" },
+  { itemName: "Bacon", quantity: 15, unit: "kg", lowStockThreshold: 3, category: "Meat" },
+  { itemName: "Chicken Wings", quantity: 25, unit: "kg", lowStockThreshold: 5, category: "Meat" },
+  
+  // Seafood
+  { itemName: "Salmon Fillet", quantity: 20, unit: "kg", lowStockThreshold: 5, category: "Seafood" },
+  { itemName: "Shrimp", quantity: 15, unit: "kg", lowStockThreshold: 3, category: "Seafood" },
+  { itemName: "Tuna", quantity: 10, unit: "kg", lowStockThreshold: 3, category: "Seafood" },
+  
+  // Vegetables
+  { itemName: "Tomatoes", quantity: 35, unit: "kg", lowStockThreshold: 10, category: "Vegetables" },
+  { itemName: "Onions", quantity: 40, unit: "kg", lowStockThreshold: 10, category: "Vegetables" },
+  { itemName: "Bell Peppers", quantity: 20, unit: "kg", lowStockThreshold: 5, category: "Vegetables" },
+  { itemName: "Lettuce", quantity: 15, unit: "kg", lowStockThreshold: 5, category: "Vegetables" },
+  { itemName: "Carrots", quantity: 25, unit: "kg", lowStockThreshold: 8, category: "Vegetables" },
+  { itemName: "Mushrooms", quantity: 12, unit: "kg", lowStockThreshold: 3, category: "Vegetables" },
+  { itemName: "Broccoli", quantity: 18, unit: "kg", lowStockThreshold: 5, category: "Vegetables" },
+  { itemName: "Garlic", quantity: 8, unit: "kg", lowStockThreshold: 2, category: "Vegetables" },
+  
+  // Fruits
+  { itemName: "Lemons", quantity: 10, unit: "kg", lowStockThreshold: 3, category: "Fruits" },
+  { itemName: "Strawberries", quantity: 8, unit: "kg", lowStockThreshold: 2, category: "Fruits" },
+  
+  // Dairy
+  { itemName: "Whole Milk", quantity: 50, unit: "l", lowStockThreshold: 15, category: "Dairy" },
+  { itemName: "Heavy Cream", quantity: 20, unit: "l", lowStockThreshold: 5, category: "Dairy" },
+  { itemName: "Mozzarella Cheese", quantity: 25, unit: "kg", lowStockThreshold: 8, category: "Dairy" },
+  { itemName: "Parmesan Cheese", quantity: 15, unit: "kg", lowStockThreshold: 5, category: "Dairy" },
+  { itemName: "Butter", quantity: 20, unit: "kg", lowStockThreshold: 5, category: "Dairy" },
+  { itemName: "Eggs", quantity: 200, unit: "pcs", lowStockThreshold: 50, category: "Dairy" },
+  
+  // Grains
+  { itemName: "Rice", quantity: 100, unit: "kg", lowStockThreshold: 25, category: "Grains" },
+  { itemName: "Pasta", quantity: 50, unit: "kg", lowStockThreshold: 15, category: "Grains" },
+  { itemName: "All-Purpose Flour", quantity: 75, unit: "kg", lowStockThreshold: 20, category: "Grains" },
+  { itemName: "Pizza Dough", quantity: 30, unit: "kg", lowStockThreshold: 10, category: "Grains" },
+  
+  // Spices
+  { itemName: "Salt", quantity: 20, unit: "kg", lowStockThreshold: 5, category: "Spices" },
+  { itemName: "Black Pepper", quantity: 5, unit: "kg", lowStockThreshold: 1, category: "Spices" },
+  { itemName: "Oregano", quantity: 2, unit: "kg", lowStockThreshold: 0.5, category: "Spices" },
+  { itemName: "Basil (Dried)", quantity: 1.5, unit: "kg", lowStockThreshold: 0.3, category: "Spices" },
+  
+  // Beverages
+  { itemName: "Coca Cola", quantity: 100, unit: "l", lowStockThreshold: 30, category: "Beverages" },
+  { itemName: "Orange Juice", quantity: 60, unit: "l", lowStockThreshold: 20, category: "Beverages" },
+  { itemName: "Coffee Beans", quantity: 15, unit: "kg", lowStockThreshold: 5, category: "Beverages" },
+  { itemName: "Bottled Water", quantity: 200, unit: "l", lowStockThreshold: 50, category: "Beverages" },
+  
+  // General
+  { itemName: "Olive Oil", quantity: 30, unit: "l", lowStockThreshold: 10, category: "General" },
+  { itemName: "Vegetable Oil", quantity: 40, unit: "l", lowStockThreshold: 10, category: "General" },
+  { itemName: "Soy Sauce", quantity: 15, unit: "l", lowStockThreshold: 5, category: "General" },
+  { itemName: "Tomato Sauce", quantity: 25, unit: "l", lowStockThreshold: 8, category: "General" },
+  { itemName: "BBQ Sauce", quantity: 20, unit: "l", lowStockThreshold: 5, category: "General" },
+  { itemName: "Sugar", quantity: 50, unit: "kg", lowStockThreshold: 15, category: "General" },
+];
+
 const seedReset = async () => {
   try {
     console.log("🔌 Connecting to MongoDB...");
@@ -408,7 +470,7 @@ const seedReset = async () => {
       categories: { created: 0, existing: 0 },
       menuItems: { deleted: 0, created: 0 },
       tables: { deleted: 0, created: 0 },
-      inventory: { deleted: 0 },
+      inventory: { deleted: 0, created: 0 },
     } as any;
 
     // Reset Orders
@@ -484,6 +546,19 @@ const seedReset = async () => {
       stats.tables.created++;
     }
 
+    // Seed Inventory
+    console.log("\n📦 Seeding Inventory Items...");
+    console.log("─────────────────────────────────────────");
+    for (const item of inventoryItems) {
+      // @ts-ignore
+      await Inventory.create(item);
+      const stockStatus = item.quantity <= item.lowStockThreshold ? "🔴" : "✅";
+      console.log(
+        `  ${stockStatus} ${item.itemName.padEnd(25)} ${item.quantity.toString().padStart(6)} ${item.unit.padEnd(5)} [${item.category}]`,
+      );
+      stats.inventory.created++;
+    }
+
     console.log("\n");
     console.log("═════════════════════════════════════════");
     console.log("       DATABASE RESET COMPLETED! ✨");
@@ -499,6 +574,9 @@ const seedReset = async () => {
     );
     console.log(
       `  Tables:             ${stats.tables.deleted} deleted, ${stats.tables.created} created`,
+    );
+    console.log(
+      `  Inventory:          ${stats.inventory.created} created`,
     );
 
     console.log(`\n📈 Current Database Status:`);

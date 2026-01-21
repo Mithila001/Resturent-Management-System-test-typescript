@@ -1,7 +1,10 @@
 // Owner/Admin Dashboard - High-level restaurant overview and controls
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, type FormEvent } from "react";
+import { Link } from "react-router-dom";
 import { ownerAPI } from "../../api/ownerAPI";
 import DashboardStats from "../../components/DashboardStats";
+import axios from "axios";
+import API_URL from "../../config/api";
 
 interface BusinessMetrics {
   totalRevenue: number;
@@ -16,26 +19,43 @@ interface BusinessMetrics {
   inventoryValue: number;
 }
 
-interface FinancialReport {
-  period: string;
-  revenue: number;
-  expenses: number;
-  profit: number;
-  growthRate: number;
+interface User {
+  _id?: string;
+  id?: string;
+  name?: string;
+  email?: string;
+  role?: string;
+}
+
+interface NewEmployee {
+  name: string;
+  email: string;
+  password: string;
+  role: string;
 }
 
 const OwnerDashboard: React.FC = () => {
   const [metrics, setMetrics] = useState<BusinessMetrics | null>(null);
-  const [reports, setReports] = useState<FinancialReport[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedView, setSelectedView] = useState<"overview" | "financial" | "operational">(
-    "overview",
-  );
+  const [selectedView, setSelectedView] = useState<"overview" | "employees">("overview");
+  
+  // Employee management states
+  const [employees, setEmployees] = useState<User[]>([]);
+  const [newEmployee, setNewEmployee] = useState<NewEmployee>({
+    name: "",
+    email: "",
+    password: "",
+    role: "waiter",
+  });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterRole, setFilterRole] = useState("all");
 
   useEffect(() => {
     fetchBusinessMetrics();
-    fetchFinancialReports();
-  }, []);
+    if (selectedView === "employees") {
+      fetchEmployees();
+    }
+  }, [selectedView]);
 
   const fetchBusinessMetrics = async () => {
     try {
@@ -73,35 +93,83 @@ const OwnerDashboard: React.FC = () => {
         staffCount: -1,
         inventoryValue: -1,
       });
-    }
-  };
-
-  const fetchFinancialReports = async () => {
-    try {
-      // Using the available API to get financial overview data
-      await ownerAPI.getFinancialOverview();
-      // Mock reports structure for dashboard display
-      const mockReports: FinancialReport[] = [
-        { period: "Jan 2024", revenue: 45000, expenses: 32000, profit: 13000, growthRate: 8.2 },
-        { period: "Feb 2024", revenue: 52000, expenses: 36000, profit: 16000, growthRate: 15.6 },
-        { period: "Mar 2024", revenue: 48000, expenses: 34000, profit: 14000, growthRate: -7.7 },
-      ];
-      setReports(mockReports);
-    } catch (error) {
-      console.error("Failed to fetch financial reports:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const exportReport = async (type: "financial" | "operational" | "full") => {
+  const fetchEmployees = async () => {
     try {
-      await ownerAPI.exportFinancialReport({ format: "pdf" });
-      alert(`${type} report exported successfully`);
-    } catch (error) {
-      console.error(`Failed to export ${type} report:`, error);
-      alert(`Failed to export ${type} report`);
+      const token = localStorage.getItem("token");
+      const res = await axios.get(`${API_URL}/auth/users`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setEmployees(res.data as User[]);
+    } catch (err: any) {
+      console.error("Failed to fetch employees:", err);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleCreateEmployee = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      await axios.post(`${API_URL}/auth/register`, newEmployee);
+      alert("Employee Created Successfully!");
+      setNewEmployee({ name: "", email: "", password: "", role: "waiter" });
+      fetchEmployees();
+    } catch (err: any) {
+      alert(err?.response?.data?.message || "Failed to create employee");
+    }
+  };
+
+  const handleDeleteEmployee = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this employee?")) return;
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`${API_URL}/auth/users/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      alert("Employee deleted successfully");
+      fetchEmployees();
+    } catch (err: any) {
+      alert("Failed to delete employee");
+    }
+  };
+
+  const filteredEmployees = employees.filter((emp: User) => {
+    const matchesSearch =
+      (emp.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (emp.email || "").toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRole = filterRole === "all" || emp.role === filterRole;
+    return matchesSearch && matchesRole;
+  });
+
+  const getRoleIcon = (role?: string): string => {
+    const icons: Record<string, string> = {
+      admin: "⚙️",
+      waiter: "👔",
+      chef: "👨‍🍳",
+      cashier: "💰",
+      manager: "📊",
+      owner: "👑",
+      customer: "👤",
+    };
+    return icons[role ?? ""] || "👤";
+  };
+
+  const getRoleColor = (role?: string): string => {
+    const colors: Record<string, string> = {
+      admin: "#e74c3c",
+      owner: "#9b59b6",
+      manager: "#3498db",
+      chef: "#e67e22",
+      waiter: "#1abc9c",
+      cashier: "#f39c12",
+      customer: "#95a5a6",
+    };
+    return colors[role ?? ""] || "#95a5a6";
   };
 
   if (loading) {
@@ -121,16 +189,10 @@ const OwnerDashboard: React.FC = () => {
             📊 Overview
           </button>
           <button
-            className={selectedView === "financial" ? "active" : ""}
-            onClick={() => setSelectedView("financial")}
+            className={selectedView === "employees" ? "active" : ""}
+            onClick={() => setSelectedView("employees")}
           >
-            💰 Financial
-          </button>
-          <button
-            className={selectedView === "operational" ? "active" : ""}
-            onClick={() => setSelectedView("operational")}
-          >
-            ⚙️ Operations
+            👥 Employees
           </button>
         </div>
       </div>
@@ -148,41 +210,22 @@ const OwnerDashboard: React.FC = () => {
                     ? "Error"
                     : `$${metrics.totalRevenue.toLocaleString()}`,
                 subtext: "All Time",
-                submetrics: [
-                  {
-                    label: "Monthly",
-                    value:
-                      metrics.monthlyRevenue === -1
-                        ? "Error"
-                        : `$${metrics.monthlyRevenue.toLocaleString()}`,
-                  },
-                  {
-                    label: "Yearly",
-                    value:
-                      metrics.yearlyRevenue === -1
-                        ? "Error"
-                        : `$${metrics.yearlyRevenue.toLocaleString()}`,
-                  },
-                ],
                 variant: "primary",
               },
               {
                 icon: "📋",
                 title: "Total Orders",
                 value: metrics.totalOrders === -1 ? "Error" : metrics.totalOrders,
-                change: { value: "+12% vs last month", type: "positive" },
+                subtext: "All time orders",
               },
               {
                 icon: "👥",
                 title: "Customer Base",
                 value: metrics.totalCustomers === -1 ? "Error" : metrics.totalCustomers,
-                change: {
-                  value:
-                    metrics.customerRetentionRate === -1
-                      ? "Error"
-                      : `Retention: ${metrics.customerRetentionRate}%`,
-                  type: "positive",
-                },
+                subtext:
+                  metrics.customerRetentionRate === -1
+                    ? "Error"
+                    : `Retention: ${metrics.customerRetentionRate}%`,
               },
               {
                 icon: "📈",
@@ -191,162 +234,237 @@ const OwnerDashboard: React.FC = () => {
                   metrics.averageOrderValue === -1
                     ? "Error"
                     : `$${metrics.averageOrderValue.toFixed(2)}`,
-                change: { value: "+2.3% vs last month", type: "neutral" },
-              },
-              {
-                icon: "💹",
-                title: "Profit Margin",
-                value:
-                  metrics.profitMargin === -1 ? "Error" : `${metrics.profitMargin.toFixed(1)}%`,
-                change: { value: "+1.5% vs last month", type: "positive" },
-              },
-              {
-                icon: "🏪",
-                title: "Business Health",
-                value: "Excellent",
-                subtext: "📈 Growing • 💎 Profitable",
+                subtext: "Per order average",
               },
             ]}
           />
         </div>
       )}
 
-      {/* Financial Section */}
-      {selectedView === "financial" && (
-        <div className="financial-section">
-          <div className="financial-controls">
-            <h2>💼 Financial Management</h2>
-            <div className="export-buttons">
-              <button onClick={() => exportReport("financial")} className="export-btn">
-                📊 Export Financial Report
-              </button>
-              <button onClick={() => exportReport("full")} className="export-btn">
-                📋 Full Business Report
-              </button>
-            </div>
-          </div>
-
-          <div className="financial-reports">
-            <h3>📈 Financial Performance</h3>
-            <div className="reports-table">
-              <div className="table-header">
-                <span>Period</span>
-                <span>Revenue</span>
-                <span>Expenses</span>
-                <span>Profit</span>
-                <span>Growth</span>
+      {/* Employee Management Section */}
+      {selectedView === "employees" && (
+        <div className="employee-management">
+          <div className="management-grid">
+            {/* Create Employee Form */}
+            <div className="employee-form-card">
+              <div className="card-header">
+                <h2 className="card-title">
+                  <span className="card-icon">➕</span>
+                  Add New Employee
+                </h2>
               </div>
-              {reports.map((report, index) => (
-                <div key={index} className="table-row">
-                  <span>{report.period}</span>
-                  <span className="revenue">${report.revenue.toLocaleString()}</span>
-                  <span className="expenses">${report.expenses.toLocaleString()}</span>
-                  <span className="profit">${report.profit.toLocaleString()}</span>
-                  <span className={`growth ${report.growthRate >= 0 ? "positive" : "negative"}`}>
-                    {report.growthRate >= 0 ? "+" : ""}
-                    {report.growthRate.toFixed(1)}%
-                  </span>
+              <form onSubmit={handleCreateEmployee} className="modern-form">
+                <div className="form-group">
+                  <label className="form-label">
+                    <span className="label-icon">👤</span>
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    className="form-input"
+                    placeholder="Enter employee name"
+                    value={newEmployee.name}
+                    onChange={(e) => setNewEmployee({ ...newEmployee, name: e.target.value })}
+                  />
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {metrics && (
-            <div className="financial-insights">
-              <h3>💡 Financial Insights</h3>
-              <div className="insights-grid">
-                <div className="insight-card">
-                  <h4>💰 Revenue Streams</h4>
-                  <p>Dine-in: 60% • Takeout: 25% • Delivery: 15%</p>
+                <div className="form-group">
+                  <label className="form-label">
+                    <span className="label-icon">📧</span>
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    className="form-input"
+                    placeholder="employee@example.com"
+                    value={newEmployee.email}
+                    onChange={(e) => setNewEmployee({ ...newEmployee, email: e.target.value })}
+                  />
                 </div>
-                <div className="insight-card">
-                  <h4>📊 Cost Analysis</h4>
-                  <p>Food Cost: 32% • Labor: 28% • Overhead: 15%</p>
+                <div className="form-group">
+                  <label className="form-label">
+                    <span className="label-icon">🔒</span>
+                    Password
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    className="form-input"
+                    placeholder="Enter password"
+                    value={newEmployee.password}
+                    onChange={(e) =>
+                      setNewEmployee({
+                        ...newEmployee,
+                        password: e.target.value,
+                      })
+                    }
+                  />
                 </div>
-                <div className="insight-card">
-                  <h4>📈 Growth Opportunities</h4>
-                  <p>Catering services could increase revenue by 20%</p>
+                <div className="form-group">
+                  <label className="form-label">
+                    <span className="label-icon">💼</span>
+                    Role
+                  </label>
+                  <select
+                    className="form-input form-select"
+                    value={newEmployee.role}
+                    onChange={(e) => setNewEmployee({ ...newEmployee, role: e.target.value })}
+                  >
+                    <option value="waiter">Waiter</option>
+                    <option value="chef">Chef</option>
+                    <option value="cashier">Cashier</option>
+                    <option value="manager">Manager</option>
+                    <option value="admin">Admin</option>
+                  </select>
                 </div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Operational Section */}
-      {selectedView === "operational" && metrics && (
-        <div className="operational-section">
-          <h2>⚙️ Operational Management</h2>
-
-          <div className="operational-grid">
-            <div className="operational-card">
-              <h3>👥 Staff Management</h3>
-              <div className="stat-value">
-                {metrics.staffCount === -1 ? "Error" : `${metrics.staffCount} employees`}
-              </div>
-              <div className="operational-actions">
-                <button className="action-btn">View Staff</button>
-                <button className="action-btn">Schedules</button>
-                <button className="action-btn">Performance</button>
-              </div>
-            </div>
-
-            <div className="operational-card">
-              <h3>📦 Inventory Value</h3>
-              <div className="stat-value">
-                {metrics.inventoryValue === -1
-                  ? "Error"
-                  : `$${metrics.inventoryValue.toLocaleString()}`}
-              </div>
-              <div className="operational-actions">
-                <button className="action-btn">View Inventory</button>
-                <button className="action-btn">Suppliers</button>
-                <button className="action-btn">Orders</button>
-              </div>
+                <button type="submit" className="btn btn-primary btn-full">
+                  <span>➕</span> Create Employee
+                </button>
+              </form>
             </div>
 
-            <div className="operational-card">
-              <h3>🏪 Restaurant Status</h3>
-              <div className="stat-value status-operational">Operational</div>
-              <div className="status-indicators">
-                <div className="status-item">
-                  <span className="status-dot green"></span>
-                  Kitchen: Active
-                </div>
-                <div className="status-item">
-                  <span className="status-dot green"></span>
-                  Service: Normal
-                </div>
-                <div className="status-item">
-                  <span className="status-dot yellow"></span>
-                  Delivery: Limited
-                </div>
+            {/* Employee List */}
+            <div className="employee-list-card">
+              <div className="card-header">
+                <h2 className="card-title">
+                  <span className="card-icon">👥</span>
+                  Employee Directory
+                </h2>
+                <span className="employee-count">{filteredEmployees.length} employees</span>
               </div>
-            </div>
-          </div>
 
-          <div className="system-controls">
-            <h3>🔧 System Controls</h3>
-            <div className="controls-grid">
-              <button className="control-btn emergency">🚨 Emergency Stop</button>
-              <button className="control-btn warning">⚠️ Maintenance Mode</button>
-              <button className="control-btn info">🔄 System Backup</button>
-              <button className="control-btn success">📊 Generate Report</button>
+              {/* Search and Filter */}
+              <div className="search-filter-section">
+                <div className="search-box">
+                  <span className="search-icon">🔍</span>
+                  <input
+                    type="text"
+                    placeholder="Search employees..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="search-input"
+                  />
+                </div>
+                <select
+                  value={filterRole}
+                  onChange={(e) => setFilterRole(e.target.value)}
+                  className="role-filter"
+                >
+                  <option value="all">All Roles</option>
+                  <option value="admin">Admin</option>
+                  <option value="manager">Manager</option>
+                  <option value="chef">Chef</option>
+                  <option value="waiter">Waiter</option>
+                  <option value="cashier">Cashier</option>
+                  <option value="customer">Customer</option>
+                </select>
+              </div>
+
+              {/* Employee Cards */}
+              <div className="employee-cards">
+                {filteredEmployees.map((user) => (
+                  <div key={user._id ?? user.id ?? user.email} className="employee-card">
+                    <div className="employee-card-header">
+                      <div
+                        className="employee-avatar"
+                        style={{ background: getRoleColor(user.role) }}
+                      >
+                        {(user.name ?? "").charAt(0).toUpperCase() || "U"}
+                      </div>
+                      <div className="employee-info">
+                        <h4 className="employee-name">{user.name ?? ""}</h4>
+                        <p className="employee-email">{user.email ?? ""}</p>
+                      </div>
+                    </div>
+                    <div className="employee-card-body">
+                      <div
+                        className="employee-role"
+                        style={{ background: getRoleColor(user.role) }}
+                      >
+                        <span className="role-icon">{getRoleIcon(user.role)}</span>
+                        <span className="role-text">{user.role ?? ""}</span>
+                      </div>
+                    </div>
+                    <div className="employee-card-actions">
+                      {(user._id || user.id) && (
+                        <button
+                          onClick={() => handleDeleteEmployee(user._id ?? user.id ?? "")}
+                          className="delete-employee-btn"
+                        >
+                          <span>🗑️</span> Delete
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {filteredEmployees.length === 0 && (
+                <div className="empty-state">
+                  <span className="empty-icon">👥</span>
+                  <p>No employees found matching your criteria</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
       )}
 
       {/* Quick Access Panel */}
-      <div className="quick-access">
-        <h3>🚀 Quick Access</h3>
-        <div className="quick-actions">
-          <button className="quick-btn">📱 Mobile App Settings</button>
-          <button className="quick-btn">🌐 Website Management</button>
-          <button className="quick-btn">📧 Marketing Campaigns</button>
-          <button className="quick-btn">🎯 Business Analytics</button>
-          <button className="quick-btn">💳 Payment Gateway</button>
-          <button className="quick-btn">🔐 Security Settings</button>
+      <div className="section">
+        <h2 className="section-title">
+          <span className="section-icon">🎯</span>
+          Quick Access
+        </h2>
+        <div className="quick-links-grid">
+          <Link to="/inventory" className="quick-link-card">
+            <div
+              className="quick-link-icon"
+              style={{
+                background: "linear-gradient(135deg, #9b59b6, #8e44ad)",
+              }}
+            >
+              📦
+            </div>
+            <div className="quick-link-content">
+              <h3>Inventory Management</h3>
+              <p>Track stock and low inventory items</p>
+            </div>
+            <div className="quick-link-arrow">→</div>
+          </Link>
+
+          <Link to="/orders" className="quick-link-card">
+            <div
+              className="quick-link-icon"
+              style={{
+                background: "linear-gradient(135deg, #3498db, #2980b9)",
+              }}
+            >
+              📋
+            </div>
+            <div className="quick-link-content">
+              <h3>All Orders</h3>
+              <p>View complete order history</p>
+            </div>
+            <div className="quick-link-arrow">→</div>
+          </Link>
+
+          <Link to="/menu" className="quick-link-card">
+            <div
+              className="quick-link-icon"
+              style={{
+                background: "linear-gradient(135deg, #1abc9c, #16a085)",
+              }}
+            >
+              🍽️
+            </div>
+            <div className="quick-link-content">
+              <h3>Menu Preview</h3>
+              <p>View customer-facing menu</p>
+            </div>
+            <div className="quick-link-arrow">→</div>
+          </Link>
         </div>
       </div>
     </div>

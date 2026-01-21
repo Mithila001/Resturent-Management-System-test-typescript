@@ -6,6 +6,7 @@ import "./index.css";
 import "./styles/enhanced.css";
 import "./styles/status-badges.css";
 import "./styles/dashboard.css";
+import "./styles/advanced-dashboard.css";
 import "./responsive.css";
 
 const rootEl = document.getElementById("root");
