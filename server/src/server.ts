@@ -23,7 +23,7 @@ if (process.env.NODE_ENV === "development") {
 const http = require("http");
 const { Server } = require("socket.io");
 const app = require("./app");
-const connectDB = require("./config/db");
+import connectDB from "./config/db";
 const tableRoutes = require("./routes/tableRoutes");
 
 // Connect to Database
