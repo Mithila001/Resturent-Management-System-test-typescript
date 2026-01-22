@@ -145,6 +145,7 @@ const Menu: React.FC = () => {
             menuItems.map((item) => (
               <div
                 key={item._id}
+                className="menu-item"
                 style={{
                   background: "white",
                   borderRadius: "var(--border-radius)",
@@ -275,7 +276,8 @@ const Menu: React.FC = () => {
                   {shouldShowCart && (
                     <button
                       onClick={(e) => handleAddToCart(item, e)}
-                      className="btn btn-primary"
+                      className="btn btn-primary add-to-cart"
+                      data-cy="add-to-cart"
                       style={{ padding: "0.5rem 1rem", width: "100%" }}
                     >
                       Add to Cart

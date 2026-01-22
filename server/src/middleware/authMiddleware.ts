@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-const jwt = require("jsonwebtoken");
-const User = require("../models/User").default || require("../models/User");
+import jwt from "jsonwebtoken";
+import User from "../models/User";
 
 type AuthRequest = Request & { user?: any };
 
@@ -13,7 +13,7 @@ const protect = async (req: AuthRequest, res: Response, next: NextFunction): Pro
 
       // Verify token (use same dev fallback secret as signer)
       const secret = process.env.JWT_SECRET || "dev_secret";
-      const decoded: any = jwt.verify(token, secret);
+      const decoded: any = jwt.verify(token!, secret);
 
       // Dev-only: log decoded token for debugging
       if (process.env.NODE_ENV === "development") {
@@ -35,7 +35,7 @@ const protect = async (req: AuthRequest, res: Response, next: NextFunction): Pro
       // This helps when .env or secrets differ between processes during local testing.
       if (process.env.NODE_ENV === "development") {
         try {
-          const decodedUnsafe: any = jwt.decode(token);
+          const decodedUnsafe: any = jwt.decode(token!);
           console.warn(
             "DEV WARNING: JWT verification failed, falling back to decoded token (unsafe for production).",
             decodedUnsafe,
@@ -76,4 +76,4 @@ const authorize = (...roles: string[]) => {
   };
 };
 
-module.exports = { protect, authorize };
+export { protect, authorize };

@@ -1,4 +1,4 @@
-require("dotenv").config();
+import "dotenv/config";
 
 // Default to development mode when not explicitly set (safe for local dev).
 if (!process.env.NODE_ENV) {
@@ -20,11 +20,10 @@ if (process.env.NODE_ENV === "development") {
     : "(none)";
   console.log(`DEV: NODE_ENV=${process.env.NODE_ENV}, JWT_SECRET=${masked}`);
 }
-const http = require("http");
-const { Server } = require("socket.io");
-const app = require("./app");
+import http from "http";
+import { Server } from "socket.io";
+import app from "./app";
 import connectDB from "./config/db";
-const tableRoutes = require("./routes/tableRoutes");
 
 // Connect to Database
 connectDB();

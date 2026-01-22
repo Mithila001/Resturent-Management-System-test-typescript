@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const {
+import {
   getFinancialOverview,
   getProfitAnalysis,
   getBusinessMetrics,
@@ -8,8 +8,8 @@ const {
   getComparativeAnalysis,
   exportFinancialReport,
   getDashboardStats,
-} = require("../controllers/ownerController");
-const { protect, authorize } = require("../middleware/authMiddleware");
+} from "../controllers/ownerController";
+import { protect, authorize } from "../middleware/authMiddleware";
 
 // All routes require owner or admin authentication
 router.use(protect);
@@ -30,4 +30,4 @@ router.get("/comparative-analysis", getComparativeAnalysis);
 // Export reports
 router.get("/export-report", exportFinancialReport);
 
-module.exports = router;
+export default router;

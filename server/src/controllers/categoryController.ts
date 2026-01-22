@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-const Category = require("../models/Category").default || require("../models/Category");
+import Category from "../models/Category";
 
 // @desc    Get all categories
 // @route   GET /api/categories
@@ -105,7 +105,7 @@ const deleteCategory = async (req: Request, res: Response) => {
   }
 };
 
-module.exports = {
+export {
   getCategories,
   getCategoryById,
   createCategory,

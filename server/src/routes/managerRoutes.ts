@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const {
+import {
   getAnalytics,
   getStaffPerformance,
   getInventoryStatus,
@@ -9,8 +9,8 @@ const {
   getCustomerInsights,
   updateMenuItem,
   getDashboardStats,
-} = require("../controllers/managerController");
-const { protect, authorize } = require("../middleware/authMiddleware");
+} from "../controllers/managerController";
+import { protect, authorize } from "../middleware/authMiddleware";
 
 // All routes require manager authentication
 router.use(protect);
@@ -38,4 +38,4 @@ router.get("/customer-insights", getCustomerInsights);
 // Menu management
 router.put("/menu/:id", updateMenuItem);
 
-module.exports = router;
+export default router;

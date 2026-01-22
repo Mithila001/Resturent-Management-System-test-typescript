@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-const Order = require("../models/Order").default || require("../models/Order");
-const User = require("../models/User").default || require("../models/User");
-const MenuItem = require("../models/MenuItem").default || require("../models/MenuItem");
-const Inventory = require("../models/Inventory").default || require("../models/Inventory");
+import Order from "../models/Order";
+import User from "../models/User";
+import MenuItem from "../models/MenuItem";
+import Inventory from "../models/Inventory";
 
 type AuthRequest = Request & { user?: any };
 
@@ -569,7 +569,7 @@ const getDashboardStats = async (req: Request, res: Response) => {
   }
 };
 
-module.exports = {
+export {
   getFinancialOverview,
   getProfitAnalysis,
   getBusinessMetrics,

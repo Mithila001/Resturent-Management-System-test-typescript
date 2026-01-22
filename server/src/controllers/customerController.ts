@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-const MenuItem = require("../models/MenuItem").default || require("../models/MenuItem");
-const Category = require("../models/Category").default || require("../models/Category");
-const Order = require("../models/Order").default || require("../models/Order");
+import MenuItem from "../models/MenuItem";
+import Category from "../models/Category";
+import Order from "../models/Order";
 
 type AuthRequest = Request & { user?: any };
 
@@ -259,7 +259,8 @@ const getOrderDetails = async (req: AuthRequest, res: Response) => {
     }
 
     // Verify this order belongs to the customer
-    if (order.user._id.toString() !== req.user?._id.toString()) {
+    const isOwner = order.user && order.user._id.toString() === req.user?._id?.toString();
+    if (!isOwner) {
       return res.status(403).json({
         message: "Not authorized to view this order",
       });
@@ -283,7 +284,7 @@ const cancelOrder = async (req: AuthRequest, res: Response) => {
     }
 
     // Verify ownership
-    if (order.user.toString() !== req.user?._id.toString()) {
+    if (!order.user || order.user.toString() !== req.user?._id.toString()) {
       return res.status(403).json({
         message: "Not authorized to cancel this order",
       });
@@ -459,7 +460,7 @@ const getGuestOrderById = async (req: Request, res: Response) => {
   }
 };
 
-module.exports = {
+export {
   browseMenu,
   getMenuItemDetails,
   getCategories,

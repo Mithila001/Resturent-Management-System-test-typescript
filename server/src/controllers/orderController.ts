@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
-const Order = require("../models/Order").default || require("../models/Order");
-const MenuItem = require("../models/MenuItem").default || require("../models/MenuItem");
-const Table = require("../models/Table").default || require("../models/Table");
+import { calculateOrderTotal } from "../utils/orderUtils";
+import Order from "../models/Order";
+import MenuItem from "../models/MenuItem";
+import Table from "../models/Table";
 
 type AuthRequest = Request & { user?: any };
 
@@ -41,10 +42,8 @@ const createOrder = async (req: AuthRequest, res: Response) => {
       }
     }
 
-    // Process order items and calculate total
-    let orderItems: any[] = [];
-    let totalAmount = 0;
-
+    // Validate items and prepare for calculation
+    const itemsWithPrice = [];
     for (const item of items) {
       const menuItem = await MenuItem.findById(item.menuItem);
 
@@ -56,18 +55,16 @@ const createOrder = async (req: AuthRequest, res: Response) => {
         return res.status(400).json({ message: `${menuItem.name} is currently unavailable` });
       }
 
-      const subtotal = menuItem.price * item.quantity;
-
-      orderItems.push({
+      itemsWithPrice.push({
         menuItem: menuItem._id,
         name: menuItem.name,
         quantity: item.quantity,
         price: menuItem.price,
-        subtotal: subtotal,
       });
-
-      totalAmount += subtotal;
     }
+
+    // Calculate totals using utility
+    const { orderItems, totalAmount } = calculateOrderTotal(itemsWithPrice);
 
     // Calculate estimated delivery time (45 minutes from now)
     const estimatedDeliveryTime = new Date(Date.now() + 45 * 60 * 1000);
@@ -182,7 +179,7 @@ const getOrderById = async (req: AuthRequest, res: Response) => {
 
     // Check if user is authorized to view this order
     const isAdmin = ["admin", "manager", "owner"].includes(req.user?.role);
-    const isOwner = order.user._id.toString() === req.user?._id.toString();
+    const isOwner = order.user && order.user._id.toString() === req.user?._id?.toString();
     const isStaff = ["chef", "waiter", "cashier"].includes(req.user?.role);
 
     if (!isAdmin && !isOwner && !isStaff) {
@@ -245,7 +242,7 @@ const updateOrderStatus = async (req: AuthRequest, res: Response) => {
 
     // Emit socket event for real-time update
     const io = req.app.get("socketio");
-    if (io) {
+    if (io && updatedOrder && updatedOrder.user) {
       (io as any).emit("orderStatusUpdated", {
         orderId: updatedOrder._id,
         orderNumber: updatedOrder.orderNumber,
@@ -288,7 +285,7 @@ const updatePaymentStatus = async (req: AuthRequest, res: Response) => {
 
     // Emit socket event for real-time update
     const io = req.app.get("socketio");
-    if (io) {
+    if (io && updatedOrder && updatedOrder.user) {
       (io as any).emit("paymentStatusUpdated", {
         orderId: updatedOrder._id,
         orderNumber: updatedOrder.orderNumber,
@@ -413,7 +410,7 @@ const getOrdersByTable = async (req: Request, res: Response) => {
   }
 };
 
-module.exports = {
+export {
   createOrder,
   getOrders,
   getOrderById,
