@@ -15,6 +15,10 @@ describe('Restaurant Management System E2E', () => {
         cy.get('input[name="password"]').type('customer123');
         cy.get('button[type="submit"]').click();
 
+        // Wait for login to complete and check we're not on login page anymore
+        cy.url().should('not.include', '/login');
+        cy.wait(500);
+
         // Create Order
         cy.contains('Menu').click();
         cy.get('.menu-item').first().find('button.add-to-cart').click(); // Add to cart
@@ -45,8 +49,12 @@ describe('Restaurant Management System E2E', () => {
         cy.get('input[name="password"]').type('chef123');
         cy.get('button[type="submit"]').click();
 
-        // Chef Dashboard
-        cy.contains('Chef').click();
+        // Wait for login to complete
+        cy.url().should('not.include', '/login');
+        cy.wait(500);
+
+        // Chef Dashboard - already on chef page, look for order cards
+        cy.get('.order-card', { timeout: 10000 }).should('exist');
         cy.get('.order-card').first().click(); // View latest order
         cy.contains('Start Preparing').click();
         cy.contains(/prepar/i).should('be.visible');
@@ -74,8 +82,12 @@ describe('Restaurant Management System E2E', () => {
         cy.get('input[name="password"]').type('cashier123');
         cy.get('button[type="submit"]').click();
 
-        // Cashier Dashboard
-        cy.contains('Cashier').click();
+        // Wait for login to complete
+        cy.url().should('not.include', '/login');
+        cy.wait(500);
+
+        // Cashier Dashboard - wait for order cards to load
+        cy.get('.order-card', { timeout: 10000 }).should('exist');
         cy.get('.order-card').first().click();
         // Accept browser confirm and assert alert about payment
         cy.on('window:confirm', () => true);
@@ -91,6 +103,10 @@ describe('Restaurant Management System E2E', () => {
         cy.get('input[name="email"]').type('admin@resto.com');
         cy.get('input[name="password"]').type('admin123');
         cy.get('button[type="submit"]').click();
+
+        // Wait for login to complete
+        cy.url().should('not.include', '/login');
+        cy.wait(500);
 
         // Manage Menu
         cy.contains('Menu Items').click();

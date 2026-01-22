@@ -91,11 +91,17 @@ jobs:
       - name: Build Backend
         run: cd server && npm run build
       
+      - name: Seed Database (with ts-node)
+        run: cd server && npx ts-node seed/seedProduction.ts
+        env:
+          MONGO_URI: mongodb://localhost:27017/e2e_db
+          JWT_SECRET: test_secret
+      
       - name: Start Backend
         run: |
           cd server
           node dist/src/server.js &
-          npx wait-on http://localhost:5000
+          npx wait-on http://localhost:5000/api/categories
         env:
           MONGO_URI: mongodb://localhost:27017/e2e_db
           JWT_SECRET: test_secret
@@ -110,6 +116,8 @@ jobs:
           cd client
           npm run dev -- --port 5173 &
           npx wait-on http://localhost:5173
+        env:
+          VITE_API_URL: http://localhost:5000/api
 
       # Run Cypress
       - name: Install Cypress Deps (Root)
