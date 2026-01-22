@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-const Table = require("../models/Table").default || require("../models/Table");
-const Order = require("../models/Order").default || require("../models/Order");
+import Table from "../models/Table";
+import Order from "../models/Order";
 
 type AuthRequest = Request & { user?: any };
 
@@ -114,10 +114,12 @@ const markOrderAsDelivered = async (req: AuthRequest, res: Response) => {
     }
 
     // Verify the order is for a table assigned to this waiter
-    const table = await Table.findOne({
-      tableNumber: order.tableNumber,
-      assignedWaiter: req.user?._id,
-    });
+    const table = order.tableNumber
+      ? await Table.findOne({
+        tableNumber: order.tableNumber,
+        assignedWaiter: req.user?._id,
+      })
+      : null;
 
     if (!table) {
       return res.status(403).json({
@@ -391,7 +393,7 @@ const markOrderAsServed = async (req: AuthRequest, res: Response) => {
   }
 };
 
-module.exports = {
+export {
   getMyTables,
   assignSelfToTable,
   updateTableStatus,

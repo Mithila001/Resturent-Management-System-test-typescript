@@ -54,6 +54,7 @@ const Register = () => {
             <label style={{ display: "block", marginBottom: "0.5rem" }}>Name</label>
             <input
               type="text"
+              name="name"
               required
               style={{
                 width: "100%",
@@ -69,6 +70,7 @@ const Register = () => {
             <label style={{ display: "block", marginBottom: "0.5rem" }}>Email</label>
             <input
               type="email"
+              name="email"
               required
               style={{
                 width: "100%",
@@ -84,6 +86,7 @@ const Register = () => {
             <label style={{ display: "block", marginBottom: "0.5rem" }}>Password</label>
             <input
               type="password"
+              name="password"
               required
               style={{
                 width: "100%",
@@ -99,6 +102,7 @@ const Register = () => {
           <div style={{ marginBottom: "1.5rem" }}>
             <label style={{ display: "block", marginBottom: "0.5rem" }}>I want to...</label>
             <select
+              name="role"
               style={{
                 width: "100%",
                 padding: "0.75rem",

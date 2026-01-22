@@ -69,6 +69,7 @@ const Login: React.FC = () => {
             <label style={{ display: "block", marginBottom: "0.5rem" }}>Email</label>
             <input
               type="email"
+              name="email"
               required
               style={{
                 width: "100%",
@@ -84,6 +85,7 @@ const Login: React.FC = () => {
             <label style={{ display: "block", marginBottom: "0.5rem" }}>Password</label>
             <input
               type="password"
+              name="password"
               required
               style={{
                 width: "100%",

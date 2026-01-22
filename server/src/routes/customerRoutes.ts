@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const {
+import {
   browseMenu,
   getMenuItemDetails,
   getCategories,
@@ -11,8 +11,8 @@ const {
   addMenuItemReview,
   createGuestOrder,
   getGuestOrderById,
-} = require("../controllers/customerController");
-const { protect, authorize } = require("../middleware/authMiddleware");
+} from "../controllers/customerController";
+import { protect, authorize } from "../middleware/authMiddleware";
 
 // Public routes - menu browsing
 router.get("/menu", browseMenu);
@@ -32,4 +32,4 @@ router.delete("/orders/:id", protect, authorize("customer"), cancelOrder);
 // Review feature (placeholder)
 router.post("/menu/:id/review", protect, authorize("customer"), addMenuItemReview);
 
-module.exports = router;
+export default router;

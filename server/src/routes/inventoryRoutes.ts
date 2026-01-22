@@ -1,12 +1,12 @@
-const express = require('express');
+import express from "express";
 const router = express.Router();
-const {
+import {
     getInventory,
     addInventoryItem,
     updateInventoryItem,
-    deleteInventoryItem
-} = require('../controllers/inventoryController');
-const { protect, authorize } = require('../middleware/authMiddleware');
+    deleteInventoryItem,
+} from "../controllers/inventoryController";
+import { protect, authorize } from "../middleware/authMiddleware";
 
 router.use(protect);
 
@@ -18,4 +18,4 @@ router.route('/:id')
     .put(authorize('admin', 'manager', 'owner', 'chef'), updateInventoryItem)
     .delete(authorize('admin', 'manager', 'owner'), deleteInventoryItem);
 
-module.exports = router;
+export default router;

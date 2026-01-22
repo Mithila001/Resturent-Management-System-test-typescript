@@ -1,7 +1,7 @@
-const express = require("express");
-const cors = require("cors");
-const morgan = require("morgan");
-const path = require("path");
+import express, { Request, Response, NextFunction } from "express";
+import cors from "cors";
+import morgan from "morgan";
+import path from "path";
 
 const app = express();
 
@@ -25,21 +25,18 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-// Routes
-const authRoutes = require("./routes/authRoutes");
-const categoryRoutes = require("./routes/categoryRoutes");
-const menuRoutes = require("./routes/menuRoutes");
-const orderRoutes = require("./routes/orderRoutes");
-const tableRoutes = require("./routes/tableRoutes");
-const inventoryRoutes = require("./routes/inventoryRoutes");
-
-// Role-specific routes
-const waiterRoutes = require("./routes/waiterRoutes");
-const customerRoutes = require("./routes/customerRoutes");
-const chefRoutes = require("./routes/chefRoutes");
-const cashierRoutes = require("./routes/cashierRoutes");
-const managerRoutes = require("./routes/managerRoutes");
-const ownerRoutes = require("./routes/ownerRoutes");
+import authRoutes from "./routes/authRoutes";
+import categoryRoutes from "./routes/categoryRoutes";
+import menuRoutes from "./routes/menuRoutes";
+import orderRoutes from "./routes/orderRoutes";
+import tableRoutes from "./routes/tableRoutes";
+import inventoryRoutes from "./routes/inventoryRoutes";
+import waiterRoutes from "./routes/waiterRoutes";
+import customerRoutes from "./routes/customerRoutes";
+import chefRoutes from "./routes/chefRoutes";
+import cashierRoutes from "./routes/cashierRoutes";
+import managerRoutes from "./routes/managerRoutes";
+import ownerRoutes from "./routes/ownerRoutes";
 
 // Core routes
 app.use("/api/auth", authRoutes);
@@ -57,20 +54,20 @@ app.use("/api/cashier", cashierRoutes);
 app.use("/api/manager", managerRoutes);
 app.use("/api/owner", ownerRoutes);
 
-app.get("/", (req: any, res: any) => {
+app.get("/", (req: Request, res: Response) => {
   res.send("Restaurant Ordering System API is running...");
 });
 
 // Error Handling Middleware
 // 404 Handler - MUST be before error handler
-app.use((req: any, res: any, next: any) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
   const error = new Error(`Not Found - ${req.originalUrl}`);
   res.status(404);
   next(error);
 });
 
 // Error Handling Middleware
-app.use((err: any, req: any, res: any, next: any) => {
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   res.status(statusCode);
   res.json({
@@ -79,4 +76,4 @@ app.use((err: any, req: any, res: any, next: any) => {
   });
 });
 
-module.exports = app;
+export default app;
