@@ -88,10 +88,13 @@ jobs:
       - name: Install Backend Deps
         run: cd server && npm ci
       
+      - name: Build Backend
+        run: cd server && npm run build
+      
       - name: Start Backend
         run: |
           cd server
-          npm start &
+          node dist/server.js &
           npx wait-on http://localhost:5000
         env:
           MONGO_URI: mongodb://localhost:27017/e2e_db
