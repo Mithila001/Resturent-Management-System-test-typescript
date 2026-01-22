@@ -191,6 +191,7 @@ const CashierDashboard = () => {
             {orders.map((order) => (
               <div
                 key={order._id}
+                className="order-card"
                 onClick={() => handleSelectOrder(order)}
                 style={{
                   padding: "1.5rem",
