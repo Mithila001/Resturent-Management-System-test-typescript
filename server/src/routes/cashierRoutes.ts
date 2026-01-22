@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const {
+import {
   getOrdersForPayment,
   getOrderDetails,
   processPayment,
@@ -8,8 +8,8 @@ const {
   getPaymentStats,
   getTableOrders,
   issueRefund,
-} = require("../controllers/cashierController");
-const { protect, authorize } = require("../middleware/authMiddleware");
+} from "../controllers/cashierController";
+import { protect, authorize } from "../middleware/authMiddleware";
 
 // All routes require cashier authentication
 router.use(protect);
@@ -28,4 +28,4 @@ router.get("/stats", getPaymentStats);
 // Table billing
 router.get("/tables/:tableNumber/orders", getTableOrders);
 
-module.exports = router;
+export default router;

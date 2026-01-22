@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-const MenuItem = require("../models/MenuItem").default || require("../models/MenuItem");
-const Category = require("../models/Category").default || require("../models/Category");
+import MenuItem from "../models/MenuItem";
+import Category from "../models/Category";
 
 // @desc    Get all menu items
 // @route   GET /api/menu
@@ -179,7 +179,7 @@ const deleteMenuItem = async (req: Request, res: Response) => {
   }
 };
 
-module.exports = {
+export {
   getMenuItems,
   getMenuItemById,
   createMenuItem,

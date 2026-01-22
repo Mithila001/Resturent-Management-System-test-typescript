@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-const Table = require("../models/Table").default || require("../models/Table");
+import Table from "../models/Table";
 
 type AuthRequest = Request & { user?: any };
 
@@ -135,7 +135,7 @@ const deleteTable = async (req: Request, res: Response) => {
   }
 };
 
-module.exports = {
+export {
   getTables,
   createTable,
   updateTableStatus,

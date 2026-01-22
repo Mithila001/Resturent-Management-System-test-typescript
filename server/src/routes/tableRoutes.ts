@@ -1,14 +1,14 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const {
+import {
   getTables,
   createTable,
   updateTableStatus,
   assignWaiter,
   updateTable,
   deleteTable,
-} = require("../controllers/tableController");
-const { protect, authorize } = require("../middleware/authMiddleware");
+} from "../controllers/tableController";
+import { protect, authorize } from "../middleware/authMiddleware";
 
 router
   .route("/")
@@ -32,4 +32,4 @@ router
   .route("/:id/assign")
   .put(protect, authorize("waiter", "admin", "manager", "owner"), assignWaiter);
 
-module.exports = router;
+export default router;

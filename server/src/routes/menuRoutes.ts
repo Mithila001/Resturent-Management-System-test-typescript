@@ -1,13 +1,13 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const {
+import {
   getMenuItems,
   getMenuItemById,
   createMenuItem,
   updateMenuItem,
   deleteMenuItem,
-} = require("../controllers/menuController");
-const { protect, authorize } = require("../middleware/authMiddleware");
+} from "../controllers/menuController";
+import { protect, authorize } from "../middleware/authMiddleware";
 
 // Public routes
 router.get("/", getMenuItems);
@@ -18,4 +18,4 @@ router.post("/", protect, authorize('admin'), createMenuItem);
 router.put("/:id", protect, authorize('admin', 'manager', 'owner', 'chef'), updateMenuItem);
 router.delete("/:id", protect, authorize('admin', 'owner', 'manager'), deleteMenuItem);
 
-module.exports = router;
+export default router;

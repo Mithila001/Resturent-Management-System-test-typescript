@@ -1,7 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { waiterAPI } from "../../api/waiterAPI";
-import axios from "axios";
-import API_URL from "../../config/api";
 
 type TableStatus = "available" | "occupied" | "reserved" | string;
 

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-const Order = require("../models/Order").default || require("../models/Order");
+import Order from "../models/Order";
 
 type AuthRequest = Request & { user?: any };
 
@@ -296,7 +296,7 @@ const issueRefund = async (req: AuthRequest, res: Response) => {
   }
 };
 
-module.exports = {
+export {
   getOrdersForPayment,
   getOrderDetails,
   processPayment,

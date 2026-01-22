@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-const jwt = require("jsonwebtoken");
-const User = require("../models/User").default || require("../models/User");
+import jwt from "jsonwebtoken";
+import User from "../models/User";
 
 type AuthRequest = Request & { user?: any };
 
@@ -76,4 +76,4 @@ const authorize = (...roles: string[]) => {
   };
 };
 
-module.exports = { protect, authorize };
+export { protect, authorize };

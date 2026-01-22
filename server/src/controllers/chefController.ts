@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-const Order = require("../models/Order").default || require("../models/Order");
-const MenuItem = require("../models/MenuItem").default || require("../models/MenuItem");
+import Order from "../models/Order";
+import MenuItem from "../models/MenuItem";
 
 type AuthRequest = Request & { user?: any };
 
@@ -274,7 +274,7 @@ const cancelOrder = async (req: AuthRequest, res: Response) => {
   }
 };
 
-module.exports = {
+export {
   getKitchenOrders,
   getOrderById,
   startPreparingOrder,

@@ -9,6 +9,7 @@
     "dev": "nodemon src/server.ts",
     "test": "jest",
     "lint": "eslint .",
+    "build": "tsc",
     "seed:users": "node -r ts-node/register seed/seedUsers.ts",
     "seed:tables": "node -r ts-node/register seed/seedTables.ts",
     "seed:data": "node -r ts-node/register seed/seedData.ts",

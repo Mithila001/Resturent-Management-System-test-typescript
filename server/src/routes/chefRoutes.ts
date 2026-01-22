@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const {
+import {
   getKitchenOrders,
   getOrderById,
   startPreparingOrder,
@@ -9,8 +9,8 @@ const {
   getKitchenStats,
   updateMenuItemAvailability,
   cancelOrder,
-} = require("../controllers/chefController");
-const { protect, authorize } = require("../middleware/authMiddleware");
+} from "../controllers/chefController";
+import { protect, authorize } from "../middleware/authMiddleware";
 
 // All routes require chef authentication
 router.use(protect);
@@ -30,4 +30,4 @@ router.put("/orders/:id/cancel", cancelOrder);
 // Menu item availability
 router.put("/menu/:id/availability", updateMenuItemAvailability);
 
-module.exports = router;
+export default router;

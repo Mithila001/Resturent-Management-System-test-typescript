@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const {
+import {
   getMyTables,
   assignSelfToTable,
   updateTableStatus,
@@ -11,8 +11,8 @@ const {
   verifyOrder,
   resetTable,
   markOrderAsServed,
-} = require("../controllers/waiterController");
-const { protect, authorize } = require("../middleware/authMiddleware");
+} from "../controllers/waiterController";
+import { protect, authorize } from "../middleware/authMiddleware";
 
 // All routes require waiter authentication
 router.use(protect);
@@ -32,4 +32,4 @@ router.put("/orders/:id/verify", verifyOrder); // Verify order (pending → conf
 router.put("/orders/:id/serve", markOrderAsServed); // Mark order as served
 router.put("/orders/:id/deliver", markOrderAsDelivered);
 
-module.exports = router;
+export default router;

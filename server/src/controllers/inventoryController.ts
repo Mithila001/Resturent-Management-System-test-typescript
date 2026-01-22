@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-const Inventory = require("../models/Inventory").default || require("../models/Inventory");
+import Inventory from "../models/Inventory";
 
 // @desc    Get all inventory items
 // @route   GET /api/inventory
@@ -92,7 +92,7 @@ const deleteInventoryItem = async (req: Request, res: Response) => {
   }
 };
 
-module.exports = {
+export {
   getInventory,
   addInventoryItem,
   updateInventoryItem,

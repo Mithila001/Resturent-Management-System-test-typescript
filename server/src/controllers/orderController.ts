@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import { calculateOrderTotal } from "../utils/orderUtils";
-const Order = require("../models/Order").default || require("../models/Order");
-const MenuItem = require("../models/MenuItem").default || require("../models/MenuItem");
-const Table = require("../models/Table").default || require("../models/Table");
+import Order from "../models/Order";
+import MenuItem from "../models/MenuItem";
+import Table from "../models/Table";
 
 type AuthRequest = Request & { user?: any };
 
@@ -179,7 +179,7 @@ const getOrderById = async (req: AuthRequest, res: Response) => {
 
     // Check if user is authorized to view this order
     const isAdmin = ["admin", "manager", "owner"].includes(req.user?.role);
-    const isOwner = order.user._id.toString() === req.user?._id.toString();
+    const isOwner = order.user && order.user._id.toString() === req.user?._id?.toString();
     const isStaff = ["chef", "waiter", "cashier"].includes(req.user?.role);
 
     if (!isAdmin && !isOwner && !isStaff) {
@@ -242,7 +242,7 @@ const updateOrderStatus = async (req: AuthRequest, res: Response) => {
 
     // Emit socket event for real-time update
     const io = req.app.get("socketio");
-    if (io) {
+    if (io && updatedOrder && updatedOrder.user) {
       (io as any).emit("orderStatusUpdated", {
         orderId: updatedOrder._id,
         orderNumber: updatedOrder.orderNumber,
@@ -285,7 +285,7 @@ const updatePaymentStatus = async (req: AuthRequest, res: Response) => {
 
     // Emit socket event for real-time update
     const io = req.app.get("socketio");
-    if (io) {
+    if (io && updatedOrder && updatedOrder.user) {
       (io as any).emit("paymentStatusUpdated", {
         orderId: updatedOrder._id,
         orderNumber: updatedOrder.orderNumber,
@@ -410,7 +410,7 @@ const getOrdersByTable = async (req: Request, res: Response) => {
   }
 };
 
-module.exports = {
+export {
   createOrder,
   getOrders,
   getOrderById,

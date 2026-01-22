@@ -25,21 +25,18 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-// Routes
-const authRoutes = require("./routes/authRoutes");
-const categoryRoutes = require("./routes/categoryRoutes");
-const menuRoutes = require("./routes/menuRoutes");
-const orderRoutes = require("./routes/orderRoutes");
-const tableRoutes = require("./routes/tableRoutes");
-const inventoryRoutes = require("./routes/inventoryRoutes");
-
-// Role-specific routes
-const waiterRoutes = require("./routes/waiterRoutes");
-const customerRoutes = require("./routes/customerRoutes");
-const chefRoutes = require("./routes/chefRoutes");
-const cashierRoutes = require("./routes/cashierRoutes");
-const managerRoutes = require("./routes/managerRoutes");
-const ownerRoutes = require("./routes/ownerRoutes");
+import authRoutes from "./routes/authRoutes";
+import categoryRoutes from "./routes/categoryRoutes";
+import menuRoutes from "./routes/menuRoutes";
+import orderRoutes from "./routes/orderRoutes";
+import tableRoutes from "./routes/tableRoutes";
+import inventoryRoutes from "./routes/inventoryRoutes";
+import waiterRoutes from "./routes/waiterRoutes";
+import customerRoutes from "./routes/customerRoutes";
+import chefRoutes from "./routes/chefRoutes";
+import cashierRoutes from "./routes/cashierRoutes";
+import managerRoutes from "./routes/managerRoutes";
+import ownerRoutes from "./routes/ownerRoutes";
 
 // Core routes
 app.use("/api/auth", authRoutes);

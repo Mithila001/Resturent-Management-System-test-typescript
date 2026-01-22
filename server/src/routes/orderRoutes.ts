@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const {
+import {
   createOrder,
   getOrders,
   getOrderById,
@@ -9,8 +9,8 @@ const {
   cancelOrder,
   getOrderStats,
   getOrdersByTable,
-} = require("../controllers/orderController");
-const { protect, authorize } = require("../middleware/authMiddleware");
+} from "../controllers/orderController";
+import { protect, authorize } from "../middleware/authMiddleware";
 
 // All routes require authentication
 router.use(protect);
@@ -41,4 +41,4 @@ router.put(
 // Update payment status (cashier, admin, manager, owner)
 router.put("/:id/payment", authorize("admin", "manager", "owner", "cashier"), updatePaymentStatus);
 
-module.exports = router;
+export default router;
