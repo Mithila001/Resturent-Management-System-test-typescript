@@ -94,7 +94,7 @@ jobs:
       - name: Start Backend
         run: |
           cd server
-          node dist/server.js &
+          node dist/src/server.js &
           npx wait-on http://localhost:5000
         env:
           MONGO_URI: mongodb://localhost:27017/e2e_db
