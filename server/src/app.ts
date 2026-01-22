@@ -1,7 +1,7 @@
-const express = require("express");
-const cors = require("cors");
-const morgan = require("morgan");
-const path = require("path");
+import express, { Request, Response, NextFunction } from "express";
+import cors from "cors";
+import morgan from "morgan";
+import path from "path";
 
 const app = express();
 
@@ -57,20 +57,20 @@ app.use("/api/cashier", cashierRoutes);
 app.use("/api/manager", managerRoutes);
 app.use("/api/owner", ownerRoutes);
 
-app.get("/", (req: any, res: any) => {
+app.get("/", (req: Request, res: Response) => {
   res.send("Restaurant Ordering System API is running...");
 });
 
 // Error Handling Middleware
 // 404 Handler - MUST be before error handler
-app.use((req: any, res: any, next: any) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
   const error = new Error(`Not Found - ${req.originalUrl}`);
   res.status(404);
   next(error);
 });
 
 // Error Handling Middleware
-app.use((err: any, req: any, res: any, next: any) => {
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   res.status(statusCode);
   res.json({
@@ -79,4 +79,4 @@ app.use((err: any, req: any, res: any, next: any) => {
   });
 });
 
-module.exports = app;
+export default app;

@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { calculateOrderTotal } from "../utils/orderUtils";
 const Order = require("../models/Order").default || require("../models/Order");
 const MenuItem = require("../models/MenuItem").default || require("../models/MenuItem");
 const Table = require("../models/Table").default || require("../models/Table");
@@ -41,10 +42,8 @@ const createOrder = async (req: AuthRequest, res: Response) => {
       }
     }
 
-    // Process order items and calculate total
-    let orderItems: any[] = [];
-    let totalAmount = 0;
-
+    // Validate items and prepare for calculation
+    const itemsWithPrice = [];
     for (const item of items) {
       const menuItem = await MenuItem.findById(item.menuItem);
 
@@ -56,18 +55,16 @@ const createOrder = async (req: AuthRequest, res: Response) => {
         return res.status(400).json({ message: `${menuItem.name} is currently unavailable` });
       }
 
-      const subtotal = menuItem.price * item.quantity;
-
-      orderItems.push({
+      itemsWithPrice.push({
         menuItem: menuItem._id,
         name: menuItem.name,
         quantity: item.quantity,
         price: menuItem.price,
-        subtotal: subtotal,
       });
-
-      totalAmount += subtotal;
     }
+
+    // Calculate totals using utility
+    const { orderItems, totalAmount } = calculateOrderTotal(itemsWithPrice);
 
     // Calculate estimated delivery time (45 minutes from now)
     const estimatedDeliveryTime = new Date(Date.now() + 45 * 60 * 1000);
